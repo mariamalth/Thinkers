@@ -20,7 +20,7 @@ def geterror():
     return sys.exc_info()[1]
 
 
-class AssertRaisesRegexMixin:
+class AssertRaisesRegexMixin(object):
     """Provides a way to prevent DeprecationWarnings in python >= 3.2.
 
     For this mixin to override correctly it needs to be before the
@@ -33,10 +33,14 @@ class AssertRaisesRegexMixin:
 
     def assertRaisesRegex(self, *args, **kwargs):
         try:
-            return super().assertRaisesRegex(*args, **kwargs)
+            return super(AssertRaisesRegexMixin, self).assertRaisesRegex(
+                *args, **kwargs
+            )
         except AttributeError:
             try:
-                return super().assertRaisesRegexp(*args, **kwargs)
+                return super(AssertRaisesRegexMixin, self).assertRaisesRegexp(
+                    *args, **kwargs
+                )
             except AttributeError:
                 self.skipTest("No assertRaisesRegex/assertRaisesRegexp method")
 
@@ -77,11 +81,11 @@ def get_tmp_dir():
 
 
 def question(q):
-    return input(f"\n{q.rstrip(' ')} (y/n): ").lower().strip() == "y"
+    return input("\n%s (y/n): " % q.rstrip(" ")).lower().strip() == "y"
 
 
 def prompt(p):
-    return input(f"\n{p.rstrip(' ')} (press enter to continue): ")
+    return input("\n%s (press enter to continue): " % p.rstrip(" "))
 
 
 #################################### HELPERS ##################################
@@ -158,7 +162,8 @@ def rect_perimeter_pts(rect):
     )
 
     for line in clock_wise_from_top_left:
-        yield from line
+        for pt in line:
+            yield pt
 
 
 def rect_outer_bounds(rect):
@@ -191,7 +196,7 @@ class SurfaceSubclass(pygame.Surface):
     """A subclassed Surface to test inheritance."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(SurfaceSubclass, self).__init__(*args, **kwargs)
         self.test_attribute = True
 
 

@@ -1,4 +1,5 @@
 #################################### IMPORTS ###################################
+# -*- encoding: utf-8 -*-
 
 
 import unittest
@@ -1203,7 +1204,7 @@ class LayeredDirtyTypeTest__DirtySprite(LayeredGroupBase, unittest.TestCase):
 
                     color = surface.get_at((x, y))
 
-                    self.assertEqual(color, expected_color, f"pos=({x}, {y})")
+                    self.assertEqual(color, expected_color, "pos=({}, {})".format(x, y))
         finally:
             surface.unlock()
 

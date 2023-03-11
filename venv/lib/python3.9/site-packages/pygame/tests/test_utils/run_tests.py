@@ -1,7 +1,8 @@
 import sys
 
 if __name__ == "__main__":
-    raise RuntimeError("This module is for import only")
+    sys.exit("This module is for import only")
+
 test_pkg_name = ".".join(__name__.split(".")[0:-2])
 is_pygame_pkg = test_pkg_name == "pygame.tests"
 test_runner_mod = test_pkg_name + ".test_utils.test_runner"
@@ -68,7 +69,7 @@ def run(*args, **kwds):
            Pygame tests
     python - the path to a python executable to run subprocessed tests
              (default sys.executable)
-    interactive - allow tests tagged 'interactive'.
+    interative - allow tests tagged 'interative'.
 
     Return value:
     A tuple of total number of tests run, dictionary of error information. The
@@ -174,7 +175,7 @@ def run(*args, **kwds):
     tmp = test_modules
     test_modules = []
     for name in tmp:
-        tag_module_name = f"{name[0:-5]}_tags"
+        tag_module_name = "%s_tags" % (name[0:-5],)
         try:
             tag_module = import_submodule(tag_module_name)
         except ImportError:
@@ -183,12 +184,12 @@ def run(*args, **kwds):
             try:
                 tags = tag_module.__tags__
             except AttributeError:
-                print(f"{tag_module_name} has no tags: ignoring")
+                print("%s has no tags: ignoring" % (tag_module_name,))
                 test_modules.append(name)
             else:
                 for tag in tags:
                     if tag in option_exclude:
-                        print(f"skipping {name} (tag '{tag}')")
+                        print("skipping %s (tag '%s')" % (name, tag))
                         break
                 else:
                     test_modules.append(name)
@@ -208,7 +209,7 @@ def run(*args, **kwds):
         if option_seed is None:
             option_seed = time.time()
         meta["random_seed"] = option_seed
-        print(f"\nRANDOM SEED USED: {option_seed}\n")
+        print("\nRANDOM SEED USED: %s\n" % option_seed)
         random.seed(option_seed)
         random.shuffle(test_modules)
 
@@ -238,7 +239,7 @@ def run(*args, **kwds):
                 pass_on_args.append("--" + field)
 
         def sub_test(module):
-            print(f"loading {module}")
+            print("loading %s" % module)
 
             cmd = [option_python, "-m", test_runner_mod, module] + pass_on_args
 
@@ -263,7 +264,7 @@ def run(*args, **kwds):
         t = time.time()
 
         for module, cmd, (return_code, raw_return) in tmap(sub_test, test_modules):
-            test_file = f"{os.path.join(test_subdir, module)}.py"
+            test_file = "%s.py" % os.path.join(test_subdir, module)
             cmd, test_env, working_dir = cmd
 
             test_results = get_test_results(raw_return)

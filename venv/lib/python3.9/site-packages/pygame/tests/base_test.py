@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys
 import unittest
 
@@ -36,7 +38,7 @@ class BaseModuleTest(unittest.TestCase):
         """Ensure the SDL version is valid"""
         self.assertEqual(len(pygame.get_sdl_version()), 3)
 
-    class ExporterBase:
+    class ExporterBase(object):
         def __init__(self, shape, typechar, itemsize):
             import ctypes
 
@@ -156,7 +158,7 @@ class BaseModuleTest(unittest.TestCase):
 
         class Exporter(self.ExporterBase):
             def __init__(self, shape, typechar, itemsize):
-                super().__init__(shape, typechar, itemsize)
+                super(Exporter, self).__init__(shape, typechar, itemsize)
                 self.view = BufferProxy(self.__dict__)
 
             def get__array_struct__(self):
@@ -619,6 +621,14 @@ class BaseModuleTest(unittest.TestCase):
         pygame.quit()
 
         self.assertFalse(pygame.get_init())
+
+    def todo_test_segfault(self):
+
+        # __doc__ (as of 2008-08-02) for pygame.base.segfault:
+
+        # crash
+
+        self.fail()
 
 
 if __name__ == "__main__":

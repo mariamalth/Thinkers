@@ -187,7 +187,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         fill_counts = {True: width * height, False: 0}
 
         for fill, expected_count in fill_counts.items():
-            msg = f"fill={fill}"
+            msg = "fill={}".format(fill)
 
             mask = pygame.mask.Mask(expected_size, fill=fill)
 
@@ -208,7 +208,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             for width in range(1, 66):
                 expected_count = width * height
                 expected_size = (width, height)
-                msg = f"size={expected_size}"
+                msg = "size={}".format(expected_size)
 
                 mask = pygame.mask.Mask(expected_size, fill=True)
 
@@ -223,7 +223,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         fill_counts = {True: width * height, False: 0}
 
         for fill, expected_count in fill_counts.items():
-            msg = f"fill={fill}"
+            msg = "fill={}".format(fill)
 
             mask = pygame.mask.Mask(expected_size, fill)
 
@@ -238,7 +238,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         fill_counts = {True: width * height, False: 0}
 
         for fill, expected_count in fill_counts.items():
-            msg = f"fill={fill}"
+            msg = "fill={}".format(fill)
 
             mask1 = pygame.mask.Mask(fill=fill, size=expected_size)
             mask2 = pygame.mask.Mask(size=expected_size, fill=fill)
@@ -574,7 +574,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             for fill1 in (True, False):
                 key = (fill1, fill2)
-                msg = f"key={key}"
+                msg = "key={}".format(key)
                 mask1 = pygame.mask.Mask(expected_size, fill=fill1)
                 mask1_count = mask1.count()
                 expected_pos = expected_overlaps.get(key, expected_default)
@@ -599,7 +599,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         mask2_size = mask2.get_size()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             expected_pos = (max(offset[0], 0), max(offset[1], 0))
 
             overlap_pos = mask1.overlap(other=mask2, offset=offset)
@@ -626,7 +626,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         mask2_size = mask2.get_size()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             x, y = offset
             expected_y = max(y, 0)
             if 0 == y:
@@ -663,7 +663,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         mask2_count = 1
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             overlap_pos = mask1.overlap(mask2, offset)
 
@@ -694,7 +694,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         )  # off top
 
         for offset in offsets:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             overlap_pos = mask1.overlap(mask2, offset)
 
@@ -723,7 +723,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
                 # Testing masks offset from each other.
                 for offset in self.ORIGIN_OFFSETS:
-                    msg = f"size={mask_size}, offset={offset}"
+                    msg = "size={}, offset={}".format(mask_size, offset)
                     expected_pos = (max(offset[0], 0), max(offset[1], 0))
 
                     overlap_pos = mask1.overlap(mask2, offset)
@@ -778,7 +778,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             for fill1 in (True, False):
                 key = (fill1, fill2)
-                msg = f"key={key}"
+                msg = "key={}".format(key)
                 mask1 = pygame.mask.Mask(expected_size, fill=fill1)
                 mask1_count = mask1.count()
                 expected_count = expected_counts.get(key, expected_default)
@@ -808,7 +808,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         rect2 = mask2.get_rect()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             rect2.topleft = offset
             overlap_rect = rect1.clip(rect2)
             expected_count = overlap_rect.w * overlap_rect.h
@@ -842,7 +842,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         )  # off top
 
         for offset in offsets:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             overlap_count = mask1.overlap_area(mask2, Vector2(offset))
 
@@ -875,7 +875,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
                 # Testing masks offset from each other.
                 for offset in self.ORIGIN_OFFSETS:
-                    msg = f"size={mask_size}, offset={offset}"
+                    msg = "size={}, offset={}".format(mask_size, offset)
                     rect2.topleft = offset
                     overlap_rect = rect1.clip(rect2)
                     expected_overlap_count = overlap_rect.w * overlap_rect.h
@@ -930,7 +930,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             for fill1 in (True, False):
                 key = (fill1, fill2)
-                msg = f"key={key}"
+                msg = "key={}".format(key)
                 mask1 = pygame.mask.Mask(expected_size, fill=fill1)
                 mask1_count = mask1.count()
                 expected_mask = expected_masks.get(key, expected_default)
@@ -960,11 +960,11 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
         for i in range(50):
             for j in range(10):
-                self.assertEqual(mask3.get_at((i, j)), 1, f"({i}, {j})")
+                self.assertEqual(mask3.get_at((i, j)), 1, "({}, {})".format(i, j))
 
         for i in range(50):
             for j in range(11, 50):
-                self.assertEqual(mask3.get_at((i, j)), 0, f"({i}, {j})")
+                self.assertEqual(mask3.get_at((i, j)), 0, "({}, {})".format(i, j))
 
         # Ensure mask1/mask2 unchanged.
         self.assertEqual(mask1.count(), mask1_count)
@@ -987,7 +987,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         rect2 = mask2.get_rect()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             rect2.topleft = offset
             overlap_rect = rect1.clip(rect2)
             expected_mask.clear()
@@ -1030,7 +1030,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         for corner in ("topleft", "topright", "bottomright", "bottomleft"):
             setattr(rect2, corner, getattr(corner_rect, corner))
             offset = rect2.topleft
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             overlap_rect = rect1.clip(rect2)
             expected_mask.clear()
             expected_mask.draw(
@@ -1062,7 +1062,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         )  # off top
 
         for offset in offsets:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             overlap_mask = mask1.overlap_mask(mask2, offset)
 
@@ -1098,7 +1098,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
                 # Testing masks offset from each other.
                 for offset in self.ORIGIN_OFFSETS:
-                    msg = f"size={mask_size}, offset={offset}"
+                    msg = "size={}, offset={}".format(mask_size, offset)
                     rect2.topleft = offset
                     overlap_rect = rect1.clip(rect2)
                     expected_mask.clear()
@@ -1184,7 +1184,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                 mask.fill()
 
                 self.assertEqual(
-                    mask.count(), expected_count, f"size=({width}, {height})"
+                    mask.count(), expected_count, "size=({}, {})".format(width, height)
                 )
 
     def test_clear(self):
@@ -1214,7 +1214,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                 mask.clear()
 
                 self.assertEqual(
-                    mask.count(), expected_count, f"size=({width}, {height})"
+                    mask.count(), expected_count, "size=({}, {})".format(width, height)
                 )
 
     @unittest.skipIf(IS_PYPY, "Segfaults on pypy")
@@ -1244,7 +1244,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
         for i in range(side):
             pos = (i, i)
-            msg = f"pos={pos}"
+            msg = "pos={}".format(pos)
 
             self.assertEqual(mask1.get_at(pos), 0, msg)
             self.assertEqual(mask2.get_at(pos), 1, msg)
@@ -1291,7 +1291,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                     self.assertEqual(
                         mask.count(),
                         expected_count,
-                        f"fill={fill}, size=({width}, {height})",
+                        "fill={}, size=({}, {})".format(fill, width, height),
                     )
 
     @unittest.skipIf(IS_PYPY, "Segfaults on pypy")
@@ -1310,7 +1310,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                 for new_h in range(height - 10, height + 10):
                     expected_size = (new_w, new_h)
                     expected_count = new_w * new_h if fill else 0
-                    msg = f"size={expected_size}"
+                    msg = "size={}".format(expected_size)
 
                     mask = original_mask.scale(scale=expected_size)
 
@@ -1355,7 +1355,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             for fill1 in (True, False):
                 key = (fill1, fill2)
-                msg = f"key={key}"
+                msg = "key={}".format(key)
                 mask1 = pygame.mask.Mask(expected_size, fill=fill1)
                 expected_mask = expected_masks.get(key, expected_default)
 
@@ -1380,7 +1380,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         rect2 = mask2.get_rect()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             rect2.topleft = offset
             overlap_rect = rect1.clip(rect2)
             expected_mask.clear()
@@ -1423,7 +1423,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         for corner in ("topleft", "topright", "bottomright", "bottomleft"):
             setattr(rect2, corner, getattr(corner_rect, corner))
             offset = rect2.topleft
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             overlap_rect = rect1.clip(rect2)
             expected_mask.clear()
 
@@ -1456,7 +1456,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         )  # off top
 
         for offset in offsets:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             mask1.draw(mask2, offset)
 
@@ -1488,7 +1488,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
                 # Testing masks offset from each other.
                 for offset in self.ORIGIN_OFFSETS:
-                    msg = f"size={mask_size}, offset={offset}"
+                    msg = "size={}, offset={}".format(mask_size, offset)
                     rect2.topleft = offset
                     overlap_rect = rect1.clip(rect2)
                     expected_mask.clear()
@@ -1549,7 +1549,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             for fill1 in (True, False):
                 key = (fill1, fill2)
-                msg = f"key={key}"
+                msg = "key={}".format(key)
                 mask1 = pygame.mask.Mask(expected_size, fill=fill1)
                 expected_mask = expected_masks.get(key, expected_default)
 
@@ -1574,7 +1574,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         rect2 = mask2.get_rect()
 
         for offset in self.ORIGIN_OFFSETS:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             rect2.topleft = offset
             overlap_rect = rect1.clip(rect2)
             expected_mask.fill()
@@ -1617,7 +1617,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         for corner in ("topleft", "topright", "bottomright", "bottomleft"):
             setattr(rect2, corner, getattr(corner_rect, corner))
             offset = rect2.topleft
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
             overlap_rect = rect1.clip(rect2)
             expected_mask.fill()
 
@@ -1650,7 +1650,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         )  # off top
 
         for offset in offsets:
-            msg = f"offset={offset}"
+            msg = "offset={}".format(offset)
 
             mask1.erase(mask2, offset)
 
@@ -1682,7 +1682,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
                 # Testing masks offset from each other.
                 for offset in self.ORIGIN_OFFSETS:
-                    msg = f"size={mask_size}, offset={offset}"
+                    msg = "size={}, offset={}".format(mask_size, offset)
                     rect2.topleft = offset
                     overlap_rect = rect1.clip(rect2)
                     expected_mask.fill()
@@ -1767,7 +1767,9 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                         self.assertEqual(
                             count,
                             expected_count,
-                            f"fill={fill}, size=({width}, {height}), pos={pos}",
+                            "fill={}, size=({}, {}), pos={}".format(
+                                fill, width, height, pos
+                            ),
                         )
 
     def test_count__full_mask(self):
@@ -2441,7 +2443,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                     del expected_comps[pt]  # Entry removed so it isn't reused.
                     break
 
-            self.assertTrue(found, f"missing component for pt={pt}")
+            self.assertTrue(found, "missing component for pt={}".format(pt))
 
         # Ensure the original mask is unchanged.
         self.assertEqual(mask.count(), mask_count)
@@ -2566,7 +2568,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             self.assertListEqual(
                 sorted(mask.get_bounding_rects(), key=tuple),
                 expected_rects,
-                f"size={size}",
+                "size={}".format(size),
             )
 
     @unittest.skipIf(IS_PYPY, "Segfaults on pypy")
@@ -3175,7 +3177,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         invalid_dests = (
             (0,),  # Incorrect size.
             (0, 0, 0),  # Incorrect size.
-            {0, 1},  # Incorrect type.
+            set([0, 1]),  # Incorrect type.
             {0: 1},  # Incorrect type.
             Rect,
         )  # Incorrect type.
@@ -3257,7 +3259,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             (0, 0, 1),  # Incorrect size.
             ((0, 0), (1,)),  # Incorrect size.
             ((0,), (1, 1)),  # Incorrect size.
-            {0, 1, 2, 3},  # Incorrect type.
+            set([0, 1, 2, 3]),  # Incorrect type.
             {0: 1, 2: 3},  # Incorrect type.
             Rect,  # Incorrect type.
         )
@@ -5322,7 +5324,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         """Ensures masks can be created with zero sizes."""
         for size in ((100, 0), (0, 100), (0, 0)):
             for fill in (True, False):
-                msg = f"size={size}, fill={fill}"
+                msg = "size={}, fill={}".format(size, fill)
 
                 mask = pygame.mask.Mask(size, fill=fill)
 
@@ -5383,7 +5385,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         offset = (0, 0)
 
         for size1, size2 in zero_size_pairs(51, 42):
-            msg = f"size1={size1}, size2={size2}"
+            msg = "size1={}, size2={}".format(size1, size2)
             mask1 = pygame.mask.Mask(size1, fill=True)
             mask2 = pygame.mask.Mask(size2, fill=True)
 
@@ -5400,7 +5402,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         expected_count = 0
 
         for size1, size2 in zero_size_pairs(41, 52):
-            msg = f"size1={size1}, size2={size2}"
+            msg = "size1={}, size2={}".format(size1, size2)
             mask1 = pygame.mask.Mask(size1, fill=True)
             mask2 = pygame.mask.Mask(size2, fill=True)
 
@@ -5417,7 +5419,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         expected_count = 0
 
         for size1, size2 in zero_size_pairs(43, 53):
-            msg = f"size1={size1}, size2={size2}"
+            msg = "size1={}, size2={}".format(size1, size2)
             mask1 = pygame.mask.Mask(size1, fill=True)
             mask2 = pygame.mask.Mask(size2, fill=True)
 
@@ -5436,7 +5438,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             mask.fill()
 
-            self.assertEqual(mask.count(), expected_count, f"size={size}")
+            self.assertEqual(mask.count(), expected_count, "size={}".format(size))
 
     def test_zero_mask_clear(self):
         sizes = ((100, 0), (0, 100), (0, 0))
@@ -5472,7 +5474,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         offset = (0, 0)
 
         for size1, size2 in zero_size_pairs(31, 37):
-            msg = f"size1={size1}, size2={size2}"
+            msg = "size1={}, size2={}".format(size1, size2)
             mask1 = pygame.mask.Mask(size1, fill=True)
             mask2 = pygame.mask.Mask(size2, fill=True)
             expected_count = mask1.count()
@@ -5490,7 +5492,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         offset = (0, 0)
 
         for size1, size2 in zero_size_pairs(29, 23):
-            msg = f"size1={size1}, size2={size2}"
+            msg = "size1={}, size2={}".format(size1, size2)
             mask1 = pygame.mask.Mask(size1, fill=True)
             mask2 = pygame.mask.Mask(size2, fill=True)
             expected_count = mask1.count()
@@ -5530,7 +5532,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             points = mask.outline()
 
-            self.assertListEqual(points, expected_points, f"size={size}")
+            self.assertListEqual(points, expected_points, "size={}".format(size))
 
     def test_zero_mask_outline__with_arg(self):
         """Ensures outline correctly handles zero sized masks
@@ -5542,7 +5544,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             points = mask.outline(10)
 
-            self.assertListEqual(points, expected_points, f"size={size}")
+            self.assertListEqual(points, expected_points, "size={}".format(size))
 
     def test_zero_mask_convolve(self):
         """Ensures convolve correctly handles zero sized masks.
@@ -5553,7 +5555,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             mask1 = pygame.mask.Mask(size1, fill=True)
 
             for size2 in ((11, 7), (81, 0), (0, 60), (0, 0)):
-                msg = f"sizes={size1}, {size2}"
+                msg = "sizes={}, {}".format(size1, size2)
                 mask2 = pygame.mask.Mask(size2, fill=True)
                 expected_size = (
                     max(0, size1[0] + size2[0] - 1),
@@ -5579,7 +5581,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
                 mask2 = pygame.mask.Mask(size2, fill=True)
 
                 for output_size in ((7, 5), (71, 0), (0, 70), (0, 0)):
-                    msg = f"sizes={size1}, {size2}, {output_size}"
+                    msg = "sizes={}, {}, {}".format(size1, size2, output_size)
                     output_mask = pygame.mask.Mask(output_size)
 
                     mask = mask1.convolve(mask2, output_mask)
@@ -5593,7 +5595,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
         expected_count = 0
 
         for size in ((81, 0), (0, 80), (0, 0)):
-            msg = f"size={size}"
+            msg = "size={}".format(size)
             mask = pygame.mask.Mask(size)
 
             cc_mask = mask.connected_component()
@@ -5620,7 +5622,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
 
             cc_masks = mask.connected_components()
 
-            self.assertListEqual(cc_masks, expected_cc_masks, f"size={size}")
+            self.assertListEqual(cc_masks, expected_cc_masks, "size={}".format(size))
 
     def test_zero_mask_get_bounding_rects(self):
         """Ensures get_bounding_rects correctly handles zero sized masks."""
@@ -5632,7 +5634,7 @@ class MaskTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             bounding_rects = mask.get_bounding_rects()
 
             self.assertListEqual(
-                bounding_rects, expected_bounding_rects, f"size={size}"
+                bounding_rects, expected_bounding_rects, "size={}".format(size)
             )
 
     def test_zero_mask_to_surface(self):
@@ -5674,7 +5676,7 @@ class SubMask(pygame.mask.Mask):
     """Subclass of the Mask class to help test subclassing."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(SubMask, self).__init__(*args, **kwargs)
         self.test_attribute = True
 
 
@@ -5682,7 +5684,7 @@ class SubMaskCopy(SubMask):
     """Subclass of the Mask class to help test copying subclasses."""
 
     def copy(self):
-        mask_copy = super().copy()
+        mask_copy = super(SubMaskCopy, self).copy()
         mask_copy.test_attribute = self.test_attribute
         return mask_copy
 
@@ -5691,7 +5693,7 @@ class SubMaskDunderCopy(SubMask):
     """Subclass of the Mask class to help test copying subclasses."""
 
     def __copy__(self):
-        mask_copy = super().__copy__()
+        mask_copy = super(SubMaskDunderCopy, self).__copy__()
         mask_copy.test_attribute = self.test_attribute
         return mask_copy
 
@@ -5700,7 +5702,7 @@ class SubMaskCopyAndDunderCopy(SubMaskDunderCopy):
     """Subclass of the Mask class to help test copying subclasses."""
 
     def copy(self):
-        return super().copy()
+        return super(SubMaskCopyAndDunderCopy, self).copy()
 
 
 class MaskSubclassTest(unittest.TestCase):
@@ -6091,10 +6093,14 @@ class MaskModuleTest(unittest.TestCase):
 
                 # Test the mask created at threshold values low, high and
                 # around alpha.
-                threshold_test_values = {-1, 0, alpha - 1, alpha, alpha + 1, 255, 256}
+                threshold_test_values = set(
+                    [-1, 0, alpha - 1, alpha, alpha + 1, 255, 256]
+                )
 
                 for threshold in threshold_test_values:
-                    msg = f"depth={depth}, alpha={alpha}, threshold={threshold}"
+                    msg = "depth={}, alpha={}, threshold={}".format(
+                        depth, alpha, threshold
+                    )
 
                     if alpha > threshold:
                         expected_count = all_set_count
@@ -6134,7 +6140,7 @@ class MaskModuleTest(unittest.TestCase):
 
         # Test the mask created for each different alpha threshold.
         for threshold in range(threshold_count):
-            msg = f"threshold={threshold}"
+            msg = "threshold={}".format(threshold)
             expected_mask.set_at((threshold, 0), 0)
             expected_count = expected_mask.count()
 
@@ -6220,7 +6226,7 @@ class MaskModuleTest(unittest.TestCase):
             expected_count = expected_mask.count()
 
             for threshold in range(from_threshold, to_threshold):
-                msg = f"threshold={threshold}"
+                msg = "threshold={}".format(threshold)
 
                 mask = pygame.mask.from_surface(surface, threshold)
 
@@ -6243,7 +6249,7 @@ class MaskModuleTest(unittest.TestCase):
         expected_count = 0
 
         for depth in (8, 16, 24, 32):
-            msg = f"depth={depth}"
+            msg = "depth={}".format(depth)
             surface = pygame.Surface(expected_size, 0, depth)
 
             for colorkey in colorkeys:
@@ -6271,7 +6277,7 @@ class MaskModuleTest(unittest.TestCase):
         expected_count = expected_size[0] * expected_size[1]
 
         for depth in (8, 16, 24, 32):
-            msg = f"depth={depth}"
+            msg = "depth={}".format(depth)
             surface = pygame.Surface(expected_size, 0, depth)
             surface.fill(surface_color)
 
@@ -6309,7 +6315,7 @@ class MaskModuleTest(unittest.TestCase):
         offset = (0, 0)
 
         for depth in (8, 16, 24, 32):
-            msg = f"depth={depth}"
+            msg = "depth={}".format(depth)
             surface = pygame.Surface(expected_size, 0, depth)
             # Fill the surface with alternating colors.
             alternate(surface.set_at, surface_color, colorkey, *expected_size)
@@ -6363,7 +6369,7 @@ class MaskModuleTest(unittest.TestCase):
         for size in ((100, 0), (0, 100), (0, 0)):
             mask = pygame.mask.from_surface(pygame.Surface(size))
 
-            self.assertIsInstance(mask, pygame.mask.MaskType, f"size={size}")
+            self.assertIsInstance(mask, pygame.mask.MaskType, "size={}".format(size))
             self.assertEqual(mask.get_size(), size)
 
     def test_zero_size_from_threshold(self):
@@ -6417,7 +6423,7 @@ class MaskModuleTest(unittest.TestCase):
             self.assertEqual(
                 (view[col, y] >> (x % intwidth)) & 1,
                 1,
-                f"the pixel at {point} is not set to 1",
+                "the pixel at {} is not set to 1".format(point),
             )
 
         for point in pixels_unset:
@@ -6426,7 +6432,7 @@ class MaskModuleTest(unittest.TestCase):
             self.assertEqual(
                 (view[col, y] >> (x % intwidth)) & 1,
                 0,
-                f"the pixel at {point} is not set to 0",
+                "the pixel at {} is not set to 0".format(point),
             )
 
 

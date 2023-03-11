@@ -8,7 +8,8 @@ from urllib.parse import quote, urlunparse
 def _iterpath(path):
     path, last = os.path.split(path)
     if last:
-        yield from _iterpath(path)
+        for p in _iterpath(path):
+            yield p
         yield last
 
 
@@ -26,7 +27,7 @@ def open_docs():
         url_path = quote("/".join(_iterpath(main_page)))
         drive, rest = os.path.splitdrive(__file__)
         if drive:
-            url_path = f"{drive}/{url_path}"
+            url_path = "%s/%s" % (drive, url_path)
         url = urlunparse(("file", "", url_path, "", "", ""))
     else:
         url = "https://www.pygame.org/docs/"

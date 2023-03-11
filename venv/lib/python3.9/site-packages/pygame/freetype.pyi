@@ -1,10 +1,11 @@
-from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Iterable, List, Optional, Text, Tuple, Union
 
 from pygame.color import Color
+from pygame.font import Font
 from pygame.rect import Rect
 from pygame.surface import Surface
 
-from ._common import ColorValue, FileArg, RectValue
+from ._common import _ColorValue, _FileArg, _CanBeRect
 
 def get_error() -> str: ...
 def get_version() -> Tuple[int, int, int]: ...
@@ -20,15 +21,8 @@ def SysFont(
     size: int,
     bold: int = False,
     italic: int = False,
-    constructor: Optional[Callable[[Optional[str], int, bool, bool], Font]] = None,
 ) -> Font: ...
 def get_default_font() -> str: ...
-def get_fonts() -> List[str]: ...
-def match_font(
-    name: Union[str, bytes, Iterable[Union[str, bytes]]],
-    bold: Any = False,
-    italic: Any = False,
-) -> str: ...
 
 STYLE_NORMAL: int
 STYLE_UNDERLINE: int
@@ -39,7 +33,7 @@ STYLE_DEFAULT: int
 
 class Font:
     name: str
-    path: str
+    path: Text
     size: Union[float, Tuple[float, float]]
     height: int
     ascender: int
@@ -67,7 +61,7 @@ class Font:
     resolution: int
     def __init__(
         self,
-        file: Optional[FileArg],
+        file: Optional[_FileArg],
         size: float = 0,
         font_index: int = 0,
         resolution: int = 0,
@@ -91,8 +85,8 @@ class Font:
     def render(
         self,
         text: str,
-        fgcolor: Optional[ColorValue] = None,
-        bgcolor: Optional[ColorValue] = None,
+        fgcolor: Optional[_ColorValue] = None,
+        bgcolor: Optional[_ColorValue] = None,
         style: int = STYLE_DEFAULT,
         rotation: int = 0,
         size: float = 0,
@@ -100,10 +94,10 @@ class Font:
     def render_to(
         self,
         surf: Surface,
-        dest: RectValue,
+        dest: _CanBeRect,
         text: str,
-        fgcolor: Optional[ColorValue] = None,
-        bgcolor: Optional[ColorValue] = None,
+        fgcolor: Optional[_ColorValue] = None,
+        bgcolor: Optional[_ColorValue] = None,
         style: int = STYLE_DEFAULT,
         rotation: int = 0,
         size: float = 0,
@@ -120,7 +114,7 @@ class Font:
         self,
         array: Any,
         text: str,
-        dest: Optional[RectValue] = None,
+        dest: Optional[_CanBeRect] = None,
         style: int = STYLE_DEFAULT,
         rotation: int = 0,
         size: float = 0,

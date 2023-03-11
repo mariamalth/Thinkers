@@ -1,6 +1,6 @@
 import pygame
 import random
-
+import cv2
 # initialize Pygame
 pygame.init()
 
@@ -9,6 +9,11 @@ background_image = pygame.image.load("background.png")
 WIDTH = background_image.get_width()
 HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+video = cv2.VideoCapture("background.mp4")
+success, video_image = video.read()
+fps = video.get(cv2.CAP_PROP_FPS)
+
+window = pygame.display.set_mode(video_image.shape[1::-1])
 pygame.display.set_caption("Endless Runner")
 
 # set up the colors
@@ -21,45 +26,93 @@ GREEN = (0, 255, 0)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.width = 50
-        self.height = 50
+        self.width = 110
+        self.height = 340
+        self.pos_x =  WIDTH / 2 - self.width / 3
+        self.pos_y = 340
         self.color = BLACK
         self.lives = 3
         self.current_position = "center"  # start at the center position
-        self.rect = pygame.Rect(self.get_position_x(), HEIGHT - 50, self.width, self.height)
         self.speed = 5
+        self.attack_animation = False
+        self.sprites = []
+        self.sprites.append(pygame.image.load('0001.png'))
+        self.sprites.append(pygame.image.load('0002.png'))
+        self.sprites.append(pygame.image.load('0003.png'))
+        self.sprites.append(pygame.image.load('0004.png'))
+        self.sprites.append(pygame.image.load('0005.png'))
+        self.sprites.append(pygame.image.load('0006.png'))
+        self.sprites.append(pygame.image.load('0007.png'))
+        self.sprites.append(pygame.image.load('0008.png'))
+        self.sprites.append(pygame.image.load('0009.png'))
+        self.sprites.append(pygame.image.load('0010.png'))
+        self.sprites.append(pygame.image.load('0011.png'))
+        self.sprites.append(pygame.image.load('0012.png'))
+        self.sprites.append(pygame.image.load('0013.png'))
+        self.sprites.append(pygame.image.load('0014.png'))
+        self.sprites.append(pygame.image.load('0015.png'))
+        self.sprites.append(pygame.image.load('0016.png'))
+        self.sprites.append(pygame.image.load('0017.png'))
+        self.sprites.append(pygame.image.load('0018.png'))
+        self.sprites.append(pygame.image.load('0019.png'))
+        self.sprites.append(pygame.image.load('0020.png'))
+        self.sprites.append(pygame.image.load('0021.png'))
+        self.sprites.append(pygame.image.load('0022.png'))
+        self.sprites.append(pygame.image.load('0023.png'))
+        self.sprites.append(pygame.image.load('0024.png'))
+        self.current_sprite = 0
+        self.image = self.sprites[self.current_sprite]
+        self.rect = pygame.Rect(self.get_position_x(), HEIGHT - 50, 50, 50)
+        self.rect.topleft = [self.pos_x,self.pos_y]
 
+        #smaller hitbox rectangle - only goes to bottom 1/4 of character
+        self.hitbox = pygame.Rect( self.get_position_x(), HEIGHT-50, 80, 80)
+        self.hitbox.topleft = [self.pos_x+15,HEIGHT-120]
+            
     def get_position_x(self):
         if self.current_position == "left":
-            return WIDTH // 4 - self.width // 2
+            return WIDTH // 2.5 - self.width
         elif self.current_position == "right":
-            return WIDTH * 3 // 4 - self.width // 2
+            return WIDTH * 2.5 // 4 - self.width // 2
         else:  # center
-            return WIDTH / 2 - self.width / 2
-
+            return WIDTH/2 - self.width/3
+        
     def move_left(self):
         if self.current_position == "center":
             self.current_position = "left"
             self.rect.x = self.get_position_x()
+            self.hitbox.x = self.get_position_x()+15
         elif self.current_position == "right":
             self.current_position = "center"
             self.rect.x = self.get_position_x() 
+            self.hitbox.x = self.get_position_x()+15
 
     def move_right(self):
         if self.current_position == "center":
             self.current_position = "right"
-            self.rect.x = self.get_position_x() 
+            self.rect.x = self.get_position_x()
+            self.hitbox.x = self.get_position_x() +15
         elif self.current_position == "left":
             self.current_position = "center"
             self.rect.x = self.get_position_x()
+            self.hitbox.x = self.get_position_x() +15
 
-    def update(self):
+    def update(self,speed=0.5):
         # move the player left or right based on arrow key presses
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.move_left()
         elif keys[pygame.K_RIGHT]:
             self.move_right()
+        if self.attack_animation == True:
+            self.current_sprite += speed
+            if int(self.current_sprite) >= len(self.sprites):
+                self.current_sprite = 0
+                self.attack_animation = False
+        self.image = self.sprites[int(self.current_sprite)]
+    
+    def attack(self):
+         self.attack_animation = True
 
 def size(s,b,d):
     return (d*b) / s
@@ -129,13 +182,13 @@ class Obstacle(pygame.sprite.Sprite):
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
-      
-
-
-
 # create the sprites and groups
 player = Player()
 obstacles = pygame.sprite.Group()
+moving_sprites = pygame.sprite.Group()
+
+# Creating the sprites and groups
+moving_sprites.add(player)
 
 # Set up the clock
 clock = pygame.time.Clock()
@@ -144,8 +197,8 @@ last_spawn_time = pygame.time.get_ticks() - spawn_time
 
 # set up the score
 score = 0
-font = pygame.font.SysFont(None, 36)
-
+# font = pygame.font.SysFont(None, 36)
+font = pygame.font.Font('Dream MMA.ttf',22)
 
 while player.lives > 0:
     # # handle events
@@ -161,7 +214,7 @@ while player.lives > 0:
     obstacles.update()
     
     for obstacle in obstacles:
-        if player.rect.colliderect(obstacle.get_rect()):
+        if player.hitbox.colliderect(obstacle.get_rect()):
             # the player has collided with an obstacle, so lose a life
             player.lives -= 1
             if player.lives == 0:
@@ -186,17 +239,21 @@ while player.lives > 0:
             score += 5
             
     score += 0.01
-    
+    #play video
+    success, video_image = video.read()
+    if success: 
+         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+    window.blit(video_surf, (0, 0))
     # draw the sprites and score to the screen
-    screen.blit(background_image, (0, 0))
+    player.attack()
+    # screen.blit(background_image, (0, 0))
     for obstacle in obstacles:
         pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
-    screen.blit(font.render(f"Score: {int(score)}", True, WHITE), (10, 10))
-    screen.blit(font.render(f"Lives: {player.lives}", True, WHITE), (WIDTH - 100, 10))
-    pygame.draw.rect(screen, player.color, player.rect)
-            
-    # pygame.display.flip()
+    screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
+    screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
+    moving_sprites.draw(screen)
+    moving_sprites.update(0.75)
     pygame.display.update()
-    
-    # control the frame rate
-    clock.tick(90)
+        
+        # control the frame rate
+    clock.tick(fps)

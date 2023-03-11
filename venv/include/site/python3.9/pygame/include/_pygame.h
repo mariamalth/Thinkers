@@ -57,7 +57,7 @@
 /* version macros (defined since version 1.9.5) */
 #define PG_MAJOR_VERSION 2
 #define PG_MINOR_VERSION 1
-#define PG_PATCH_VERSION 3
+#define PG_PATCH_VERSION 2
 #define PG_VERSIONNUM(MAJOR, MINOR, PATCH) \
     (1000 * (MAJOR) + 100 * (MINOR) + (PATCH))
 #define PG_VERSION_ATLEAST(MAJOR, MINOR, PATCH)                             \
@@ -184,6 +184,24 @@ typedef struct {
 
 #define import_pygame_rect() IMPORT_PYGAME_MODULE(rect)
 #endif /* ~PYGAMEAPI_RECT_INTERNAL */
+
+/*
+ * CDROM module
+ */
+
+typedef struct {
+    PyObject_HEAD int id;
+} pgCDObject;
+
+#define pgCD_AsID(x) (((pgCDObject *)x)->id)
+#ifndef PYGAMEAPI_CDROM_INTERNAL
+#define pgCD_Type (*(PyTypeObject *)PYGAMEAPI_GET_SLOT(cdrom, 0))
+
+#define pgCD_Check(x) ((x)->ob_type == &pgCD_Type)
+#define pgCD_New (*(PyObject * (*)(int)) PYGAMEAPI_GET_SLOT(cdrom, 1))
+
+#define import_pygame_cd() IMPORT_PYGAME_MODULE(cdrom)
+#endif
 
 /*
  * JOYSTICK module
@@ -358,7 +376,7 @@ typedef struct pgEventObject pgEventObject;
 
 /*
  * RWOBJECT module
- * the rwobject are only needed for C side work, not accessible from python.
+ * the rwobject are only needed for C side work, not accessable from python.
  */
 #ifndef PYGAMEAPI_RWOBJECT_INTERNAL
 #define pgRWops_FromObject \

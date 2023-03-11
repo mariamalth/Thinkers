@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from re import T
+
 import sys
 import os
 import unittest
@@ -11,6 +11,8 @@ from pygame import font as pygame_font  # So font can be replaced with ftfont
 
 
 FONTDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "fonts")
+
+UCS_4 = sys.maxunicode > 0xFFFF
 
 
 def equal_images(s1, s2):
@@ -35,22 +37,6 @@ class FontModuleTest(unittest.TestCase):
 
     def tearDown(self):
         pygame_font.quit()
-
-    def test_get_sdl_ttf_version(self):
-        def test_ver_tuple(ver):
-            self.assertIsInstance(ver, tuple)
-            self.assertEqual(len(ver), 3)
-            for i in ver:
-                self.assertIsInstance(i, int)
-
-        if pygame_font.__name__ != "pygame.ftfont":
-            compiled = pygame_font.get_sdl_ttf_version()
-            linked = pygame_font.get_sdl_ttf_version(linked=True)
-
-            test_ver_tuple(compiled)
-            test_ver_tuple(linked)
-
-            self.assertTrue(linked >= compiled)
 
     def test_SysFont(self):
         # Can only check that a font object is returned.
@@ -118,7 +104,7 @@ class FontModuleTest(unittest.TestCase):
         for font in fonts:
             path = pygame_font.match_font(font)
             self.assertFalse(path is None)
-            self.assertTrue(os.path.isabs(path) and os.path.isfile(path))
+            self.assertTrue(os.path.isabs(path))
 
     def test_match_font_name(self):
         """That match_font accepts names of various types"""
@@ -186,10 +172,6 @@ class FontModuleTest(unittest.TestCase):
         self.assertIsNone(image.get_colorkey())
         image.set_alpha(255)
         surf.blit(image, (0, 0))
-
-        # not issue 742, but be sure to test that background color is
-        # correctly issued on this mode
-        self.assertEqual(surf.get_at((0, 0)), pygame.Color(0, 0, 0))
 
     def test_issue_font_alphablit(self):
         """Check that blitting anti-aliased text doesn't
@@ -337,11 +319,12 @@ class FontTypeTest(unittest.TestCase):
             self.assertNotEqual(bm[0], um[0])
             self.assertNotEqual(bm[1], um[0])
 
-        u = "\U00013000"
-        bm = f.metrics(u)
+        if UCS_4:
+            u = u"\U00013000"
+            bm = f.metrics(u)
 
-        self.assertEqual(len(bm), 1)
-        self.assertIsNone(bm[0])
+            self.assertEqual(len(bm), 1)
+            self.assertIsNone(bm[0])
 
         return  # unfinished
         # The documentation is useless here. How large a list?
@@ -351,7 +334,7 @@ class FontTypeTest(unittest.TestCase):
         # __doc__ (as of 2008-08-02) for pygame_font.Font.metrics:
 
         # Font.metrics(text): return list
-        # Gets the metrics for each character in the passed string.
+        # Gets the metrics for each character in the pased string.
         #
         # The list contains tuples for each character, which contain the
         # minimum X offset, the maximum X offset, the minimum Y offset, the
@@ -399,16 +382,17 @@ class FontTypeTest(unittest.TestCase):
         else:
             self.assertFalse(equal_images(su, sb))
 
-        # test for internal null bytes
-        self.assertRaises(ValueError, f.render, b"ab\x00cd", 0, [0, 0, 0])
-        self.assertRaises(ValueError, f.render, "ab\x00cd", 0, [0, 0, 0])
+        b = b"ab\x00cd"
+        self.assertRaises(ValueError, f.render, b, 0, [0, 0, 0])
+        u = "ab\x00cd"
+        self.assertRaises(ValueError, f.render, b, 0, [0, 0, 0])
 
     def test_render_ucs2_ucs4(self):
         """that it renders without raising if there is a new enough SDL_ttf."""
         f = pygame_font.Font(None, 20)
         # If the font module is SDL_ttf < 2.0.15 based, then it only supports UCS-2
         # it will raise an exception for an out-of-range UCS-4 code point.
-        if hasattr(pygame_font, "UCS4"):
+        if UCS_4 and hasattr(pygame_font, "UCS_4"):
             ucs_2 = "\uFFEE"
             s = f.render(ucs_2, False, [0, 0, 0], [255, 255, 255])
             ucs_4 = "\U00010000"
@@ -438,15 +422,6 @@ class FontTypeTest(unittest.TestCase):
         f.set_underline(False)
         self.assertFalse(f.get_underline())
 
-    def test_set_strikethrough(self):
-        if pygame_font.__name__ != "pygame.ftfont":
-            f = pygame_font.Font(None, 20)
-            self.assertFalse(f.get_strikethrough())
-            f.set_strikethrough(True)
-            self.assertTrue(f.get_strikethrough())
-            f.set_strikethrough(False)
-            self.assertFalse(f.get_strikethrough())
-
     def test_bold_attr(self):
         f = pygame_font.Font(None, 20)
         self.assertFalse(f.bold)
@@ -470,15 +445,6 @@ class FontTypeTest(unittest.TestCase):
         self.assertTrue(f.underline)
         f.underline = False
         self.assertFalse(f.underline)
-
-    def test_set_strikethrough_property(self):
-        if pygame_font.__name__ != "pygame.ftfont":
-            f = pygame_font.Font(None, 20)
-            self.assertFalse(f.strikethrough)
-            f.strikethrough = True
-            self.assertTrue(f.strikethrough)
-            f.strikethrough = False
-            self.assertFalse(f.strikethrough)
 
     def test_size(self):
         f = pygame_font.Font(None, 20)
@@ -506,7 +472,7 @@ class FontTypeTest(unittest.TestCase):
 
         pygame_font.init()
         self.assertRaises(
-            FileNotFoundError, pygame_font.Font, "some-fictional-font.ttf", 20
+            FileNotFoundError, pygame_font.Font, str("some-fictional-font.ttf"), 20
         )
 
     def test_load_from_file(self):
@@ -541,7 +507,7 @@ class FontTypeTest(unittest.TestCase):
 
         fdir = str(FONTDIR)
         temp = os.path.join(fdir, path)
-        pgfont = os.path.join(fdir, "test_sans.ttf")
+        pgfont = os.path.join(fdir, u"test_sans.ttf")
         shutil.copy(pgfont, temp)
         try:
             with open(temp, "rb") as f:
@@ -555,10 +521,10 @@ class FontTypeTest(unittest.TestCase):
 
     def test_load_from_file_unicode_0(self):
         """ASCII string as a unicode object"""
-        self._load_unicode("temp_file.ttf")
+        self._load_unicode(u"temp_file.ttf")
 
     def test_load_from_file_unicode_1(self):
-        self._load_unicode("你好.ttf")
+        self._load_unicode(u"你好.ttf")
 
     def test_load_from_file_bytes(self):
         font_path = os.path.join(
@@ -572,15 +538,6 @@ class FontTypeTest(unittest.TestCase):
             pass
         bfont_path = font_path.encode(filesystem_encoding, filesystem_errors)
         f = pygame_font.Font(bfont_path, 20)
-
-    def test_issue_3144(self):
-        fpath = os.path.join(FONTDIR, "PlayfairDisplaySemibold.ttf")
-
-        # issue in SDL_ttf 2.0.18 DLL on Windows
-        # tested to make us aware of any regressions
-        for size in (60, 40, 10, 20, 70, 45, 50, 10):
-            font = pygame_font.Font(fpath, size)
-            font.render("WHERE", True, "black")
 
 
 @unittest.skipIf(IS_PYPY, "pypy skip known failure")  # TODO
@@ -604,14 +561,7 @@ class VisualTests(unittest.TestCase):
             pygame.quit()
         self.aborted = True
 
-    def query(
-        self,
-        bold=False,
-        italic=False,
-        underline=False,
-        strikethrough=False,
-        antialiase=False,
-    ):
+    def query(self, bold=False, italic=False, underline=False, antialiase=False):
         if self.aborted:
             return False
         spacing = 10
@@ -621,7 +571,7 @@ class VisualTests(unittest.TestCase):
         screen = self.screen
         screen.fill((255, 255, 255))
         pygame.display.flip()
-        if not (bold or italic or underline or strikethrough or antialiase):
+        if not (bold or italic or underline or antialiase):
             text = "normal"
         else:
             modes = []
@@ -631,28 +581,22 @@ class VisualTests(unittest.TestCase):
                 modes.append("italic")
             if underline:
                 modes.append("underlined")
-            if strikethrough:
-                modes.append("strikethrough")
             if antialiase:
                 modes.append("antialiased")
-            text = f"{'-'.join(modes)} (y/n):"
+            text = "%s (y/n):" % ("-".join(modes),)
         f.set_bold(bold)
         f.set_italic(italic)
         f.set_underline(underline)
-        if pygame_font.__name__ != "pygame.ftfont":
-            f.set_strikethrough(strikethrough)
         s = f.render(text, antialiase, (0, 0, 0))
         screen.blit(s, (offset, y))
         y += s.get_size()[1] + spacing
         f.set_bold(False)
         f.set_italic(False)
         f.set_underline(False)
-        if pygame_font.__name__ != "pygame.ftfont":
-            f.set_strikethrough(False)
         s = f.render("(some comparison text)", False, (0, 0, 0))
         screen.blit(s, (offset, y))
         pygame.display.flip()
-        while True:
+        while 1:
             for evt in pygame.event.get():
                 if evt.type == pygame.KEYDOWN:
                     if evt.key == pygame.K_ESCAPE:
@@ -675,10 +619,6 @@ class VisualTests(unittest.TestCase):
     def test_underline(self):
         self.assertTrue(self.query(underline=True))
 
-    def test_strikethrough(self):
-        if pygame_font.__name__ != "pygame.ftfont":
-            self.assertTrue(self.query(strikethrough=True))
-
     def test_antialiase(self):
         self.assertTrue(self.query(antialiase=True))
 
@@ -687,10 +627,6 @@ class VisualTests(unittest.TestCase):
 
     def test_italic_underline(self):
         self.assertTrue(self.query(italic=True, underline=True))
-
-    def test_bold_strikethrough(self):
-        if pygame_font.__name__ != "pygame.ftfont":
-            self.assertTrue(self.query(bold=True, strikethrough=True))
 
 
 if __name__ == "__main__":

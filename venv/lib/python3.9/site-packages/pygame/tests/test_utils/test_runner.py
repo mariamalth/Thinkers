@@ -10,13 +10,18 @@ if __name__ == "__main__":
 else:
     is_pygame_pkg = __name__.startswith("pygame.tests.")
 
-import io
-import optparse
-import re
 import unittest
-from pprint import pformat
-
 from .test_machinery import PygameTestLoader
+
+import re
+
+try:
+    import StringIO
+except ImportError:
+    import io as StringIO
+
+import optparse
+from pprint import pformat
 
 
 def prepare_test_env():
@@ -37,12 +42,12 @@ main_dir, test_subdir, fake_test_subdir = prepare_test_env()
 
 TAG_PAT = r"-?[a-zA-Z0-9_]+"
 TAG_RE = re.compile(TAG_PAT)
-EXCLUDE_RE = re.compile(rf"({TAG_PAT},?\s*)+$")
+EXCLUDE_RE = re.compile(r"(%s,?\s*)+$" % (TAG_PAT,))
 
 
 def exclude_callback(option, opt, value, parser):
     if EXCLUDE_RE.match(value) is None:
-        raise optparse.OptionValueError(f"{opt} argument has invalid value")
+        raise optparse.OptionValueError("%s argument has invalid value" % (opt,))
     parser.values.exclude = TAG_RE.findall(value)
 
 
@@ -170,7 +175,7 @@ def output_into_dots(output):
                     found = True
                     break
             if not found:
-                raise ValueError(f"Not sure what this is. Add to reasons. :{l}")
+                raise ValueError("Not sure what this is. Add to reasons. :%s" % l)
 
         return "".join(dotlist)
     dots = DOTS.search(output).group(1)
@@ -218,13 +223,13 @@ def combine_results(all_results, t):
     combined = [all_dots]
     if failures:
         combined += ["".join(failures).lstrip("\n")[:-1]]
-    combined += [f"{RAN_TESTS_DIV} {total_tests} tests in {t:.3f}s\n"]
+    combined += ["%s %s tests in %.3fs\n" % (RAN_TESTS_DIV, total_tests, t)]
 
     if failures:
-        infos = ([f"failures={total_fails}"] if total_fails else []) + (
-            [f"errors={total_errors}"] if total_errors else []
+        infos = (["failures=%s" % total_fails] if total_fails else []) + (
+            ["errors=%s" % total_errors] if total_errors else []
         )
-        combined += [f"FAILED ({', '.join(infos)})\n"]
+        combined += ["FAILED (%s)\n" % ", ".join(infos)]
     else:
         combined += ["OK\n"]
 
@@ -235,7 +240,7 @@ def combine_results(all_results, t):
 
 TEST_RESULTS_START = "<--!! TEST RESULTS START HERE !!-->"
 TEST_RESULTS_END = "<--!! TEST RESULTS END HERE !!-->"
-_test_re_str = f"{TEST_RESULTS_START}\n(.*){TEST_RESULTS_END}"
+_test_re_str = "%s\n(.*)%s" % (TEST_RESULTS_START, TEST_RESULTS_END)
 TEST_RESULTS_RE = re.compile(_test_re_str, re.DOTALL | re.M)
 
 
@@ -245,7 +250,7 @@ def get_test_results(raw_return):
         try:
             return eval(test_results.group(1))
         except:
-            print(f"BUGGY TEST RESULTS EVAL:\n {test_results.group(1)}")
+            print("BUGGY TEST RESULTS EVAL:\n %s" % test_results.group(1))
             raise
 
 
@@ -269,14 +274,14 @@ def run_test(
         verbosity = 1
 
     if verbosity:
-        print(f"loading {module}")
+        print("loading %s" % module)
 
     loader = PygameTestLoader(
         randomize_tests=randomize, include_incomplete=incomplete, exclude=exclude
     )
     suite.addTest(loader.loadTestsFromName(module))
 
-    output = io.StringIO()
+    output = StringIO.StringIO()
     runner = unittest.TextTestRunner(stream=output, buffer=buffer, verbosity=verbosity)
     results = runner.run(suite)
 
@@ -312,7 +317,7 @@ if __name__ == "__main__":
             run_from = "pygame.tests.go"
         else:
             run_from = os.path.join(main_dir, "run_tests.py")
-        sys.exit(f"No test module provided; consider using {run_from} instead")
+        sys.exit("No test module provided; consider using %s instead" % run_from)
     run_test(
         args[0],
         incomplete=options.incomplete,

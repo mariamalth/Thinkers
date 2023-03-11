@@ -46,9 +46,14 @@ from pygame.newbuffer import (
 )
 
 import unittest
+import sys
 import ctypes
 import operator
-from functools import reduce
+
+try:
+    reduce
+except NameError:
+    from functools import reduce
 
 __all__ = ["Exporter", "Importer"]
 
@@ -183,10 +188,10 @@ class Exporter(pygame.newbuffer.BufferMixin):
         self.buf = ctypes.addressof(self._buf) + offset
 
     def buffer_info(self):
-        return (ctypes.addressof(self.buffer), self.shape[0])
+        return (addressof(self.buffer), self.shape[0])
 
     def tobytes(self):
-        return ctypes.cast(self.buffer, ctypes.POINTER(ctypes.c_char))[0 : self._len]
+        return cast(self.buffer, POINTER(c_char))[0 : self._len]
 
     def __len__(self):
         return self.shape[0]
@@ -225,7 +230,9 @@ class Exporter(pygame.newbuffer.BufferMixin):
         elif self.is_contiguous("C"):
             view.shape = None
         else:
-            raise BufferError(f"shape required for {self.ndim} dimensional data")
+            raise BufferError(
+                "shape required for {} dimensional data".format(self.ndim)
+            )
         if (flags & PyBUF_STRIDES) == PyBUF_STRIDES:
             view.strides = ctypes.addressof(self._strides)
         elif view.shape is None or self.is_contiguous("C"):
@@ -254,7 +261,7 @@ class Exporter(pygame.newbuffer.BufferMixin):
         return False
 
 
-class Importer:
+class Importer(object):
     """An object that imports a new buffer interface
 
     The fields of the Py_buffer C struct are exposed by identically

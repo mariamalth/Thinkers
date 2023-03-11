@@ -53,7 +53,7 @@ _cursor_id_table = {
 }
 
 
-class Cursor:
+class Cursor(object):
     def __init__(self, *args):
         """Cursor(size, hotspot, xormasks, andmasks) -> Cursor
         Cursor(hotspot, Surface) -> Cursor
@@ -87,15 +87,12 @@ class Cursor:
             self.type = "bitmap"
             # pylint: disable=consider-using-generator
             # See https://github.com/pygame/pygame/pull/2509 for analysis
-            self.data = tuple(tuple(arg) for arg in args)
+            self.data = tuple([tuple(arg) for arg in args])
         else:
             raise TypeError("Arguments must match a cursor specification")
 
     def __len__(self):
         return len(self.data)
-
-    def __iter__(self):
-        return iter(self.data)
 
     def __getitem__(self, index):
         return self.data[index]
@@ -119,15 +116,15 @@ class Cursor:
     def __repr__(self):
         if self.type == "system":
             id_string = _cursor_id_table.get(self.data[0], "constant lookup error")
-            return f"<Cursor(type: system, constant: {id_string})>"
+            return "<Cursor(type: system, constant: " + id_string + ")>"
         if self.type == "bitmap":
-            size = f"size: {self.data[0]}"
-            hotspot = f"hotspot: {self.data[1]}"
-            return f"<Cursor(type: bitmap, {size}, {hotspot})>"
+            size = "size: " + str(self.data[0])
+            hotspot = "hotspot: " + str(self.data[1])
+            return "<Cursor(type: bitmap, " + size + ", " + hotspot + ")>"
         if self.type == "color":
-            hotspot = f"hotspot: {self.data[0]}"
+            hotspot = "hotspot: " + str(self.data[0])
             surf = repr(self.data[1])
-            return f"<Cursor(type: color, {hotspot}, surf: {surf})>"
+            return "<Cursor(type: color, " + hotspot + ", surf: " + surf + ")>"
         raise TypeError("Invalid Cursor")
 
 

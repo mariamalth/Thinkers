@@ -40,8 +40,9 @@ class FontViewer:
     KEY_SCROLL_SPEED = 10
     MOUSE_SCROLL_SPEED = 50
 
-    def __init__(self):
+    def __init__(self, **dparams):
         pg.init()
+        self.font_dir = dparams.get("folder", None)
 
         # create a window that uses 80 percent of the screen
         info = pg.display.Info()
@@ -79,16 +80,15 @@ class FontViewer:
                     fonts.append(font)
         return fonts or pg.font.get_fonts(), path
 
-    def render_fonts(self, text="A display of font &N"):
+    def render_fonts(self, text="A display of font &N", **dparams):
         """
         Build a list that includes a surface and the running total of their
         height for each font in the font list. Store the largest width and
         other variables for later use.
         """
-        font_size = self.font_size
-        color = (255, 255, 255)
-        instruction_color = (255, 255, 0)
-        self.back_color = (0, 0, 0)
+        font_size = dparams.get("size", 0) or self.font_size
+        color = dparams.get("color", (255, 255, 255))
+        self.back_color = dparams.get("back_color", (0, 0, 0))
 
         fonts, path = self.get_font_list()
         font_surfaces = []
@@ -101,14 +101,13 @@ class FontViewer:
         font = pg.font.SysFont(pg.font.get_default_font(), font_size)
         lines = (
             "Use the scroll wheel or click and drag",
-            "to scroll up and down.",
-            "Fonts that don't use the Latin Alphabet",
-            "might render incorrectly.",
-            f"Here are your {len(fonts)} fonts",
+            "to scroll up and down",
+            "Foreign fonts might render incorrectly",
+            "Here are your {} fonts".format(len(fonts)),
             "",
         )
         for line in lines:
-            surf = font.render(line, 1, instruction_color, self.back_color)
+            surf = font.render(line, 1, color, self.back_color)
             font_surfaces.append((surf, total_height))
             total_height += surf.get_height()
             max_width = max(max_width, surf.get_width())
@@ -117,7 +116,7 @@ class FontViewer:
         for name in sorted(fonts):
             try:
                 font = load_font(path + name, font_size)
-            except OSError:
+            except IOError:
                 continue
             line = text.replace("&N", name)
             try:
@@ -141,7 +140,6 @@ class FontViewer:
         Display the visible fonts based on the y_offset value(updated in
         handle_events) and the height of the pygame window.
         """
-        pg.display.set_caption("Font Viewer")
         display = pg.display.get_surface()
         clock = pg.time.Clock()
         center = display.get_width() // 2
@@ -230,7 +228,7 @@ class FontViewer:
     def save_png(self, name="font_viewer.png"):
         pg.image.save(self.surface, name)
         file_size = os.path.getsize(name) // 1024
-        print(f"font surface saved to {name}\nsize: {file_size:,}Kb")
+        print("font surface saved to {}\nsize: {:,}Kb".format(name, file_size))
 
     def handle_events(self):
         """

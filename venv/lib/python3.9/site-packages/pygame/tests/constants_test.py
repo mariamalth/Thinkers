@@ -216,7 +216,9 @@ class KConstantsTests(unittest.TestCase):
     def test_k__existence(self):
         """Ensures K constants exist."""
         for name in self.K_NAMES:
-            self.assertTrue(hasattr(pygame.constants, name), f"missing constant {name}")
+            self.assertTrue(
+                hasattr(pygame.constants, name), "missing constant {}".format(name)
+            )
 
     def test_k__type(self):
         """Ensures K constants are the correct type."""
@@ -227,9 +229,12 @@ class KConstantsTests(unittest.TestCase):
 
     def test_k__value_overlap(self):
         """Ensures no unexpected K constant values overlap."""
-        EXPECTED_OVERLAPS = {
-            frozenset("K_" + n for n in item) for item in K_AND_KSCAN_COMMON_OVERLAPS
-        }
+        EXPECTED_OVERLAPS = set(
+            [
+                frozenset(["K_" + n for n in item])
+                for item in K_AND_KSCAN_COMMON_OVERLAPS
+            ]
+        )
 
         overlaps = create_overlap_set(self.K_NAMES)
 
@@ -299,7 +304,9 @@ class KscanConstantsTests(unittest.TestCase):
     def test_kscan__existence(self):
         """Ensures KSCAN constants exist."""
         for name in self.KSCAN_NAMES:
-            self.assertTrue(hasattr(pygame.constants, name), f"missing constant {name}")
+            self.assertTrue(
+                hasattr(pygame.constants, name), "missing constant {}".format(name)
+            )
 
     def test_kscan__type(self):
         """Ensures KSCAN constants are the correct type."""
@@ -310,10 +317,12 @@ class KscanConstantsTests(unittest.TestCase):
 
     def test_kscan__value_overlap(self):
         """Ensures no unexpected KSCAN constant values overlap."""
-        EXPECTED_OVERLAPS = {
-            frozenset("KSCAN_" + n for n in item)
-            for item in K_AND_KSCAN_COMMON_OVERLAPS
-        }
+        EXPECTED_OVERLAPS = set(
+            [
+                frozenset(["KSCAN_" + n for n in item])
+                for item in K_AND_KSCAN_COMMON_OVERLAPS
+            ]
+        )
 
         overlaps = create_overlap_set(self.KSCAN_NAMES)
 
@@ -349,7 +358,9 @@ class KmodConstantsTests(unittest.TestCase):
     def test_kmod__existence(self):
         """Ensures KMOD constants exist."""
         for name in self.KMOD_CONSTANTS:
-            self.assertTrue(hasattr(pygame.constants, name), f"missing constant {name}")
+            self.assertTrue(
+                hasattr(pygame.constants, name), "missing constant {}".format(name)
+            )
 
     def test_kmod__type(self):
         """Ensures KMOD constants are the correct type."""

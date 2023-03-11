@@ -13,15 +13,18 @@ __all__ = [
     "ArrayInterface",
 ]
 
-if sizeof(c_uint) == sizeof(c_void_p):
-    c_size_t = c_uint
-    c_ssize_t = c_int
-elif sizeof(c_ulong) == sizeof(c_void_p):
-    c_size_t = c_ulong
-    c_ssize_t = c_long
-elif sizeof(c_ulonglong) == sizeof(c_void_p):
-    c_size_t = c_ulonglong
-    c_ssize_t = c_longlong
+try:
+    c_ssize_t  # Undefined in early Python versions
+except NameError:
+    if sizeof(c_uint) == sizeof(c_void_p):
+        c_size_t = c_uint
+        c_ssize_t = c_int
+    elif sizeof(c_ulong) == sizeof(c_void_p):
+        c_size_t = c_ulong
+        c_ssize_t = c_long
+    elif sizeof(c_ulonglong) == sizeof(c_void_p):
+        c_size_t = c_ulonglong
+        c_ssize_t = c_longlong
 
 
 SIZEOF_VOID_P = sizeof(c_void_p)
@@ -32,7 +35,7 @@ elif SIZEOF_VOID_P <= sizeof(c_long):
 elif "c_longlong" in globals() and SIZEOF_VOID_P <= sizeof(c_longlong):
     Py_intptr_t = c_longlong
 else:
-    raise RuntimeError("Unrecognized pointer size %i" % (SIZEOF_VOID_P,))
+    raise RuntimeError("Unrecognized pointer size %i" % (pointer_size,))
 
 
 class PyArrayInterface(Structure):
@@ -100,7 +103,7 @@ PAI_WRITEABLE = 0x400
 PAI_ARR_HAS_DESCR = 0x800
 
 
-class ArrayInterface:
+class ArrayInterface(object):
     def __init__(self, arr):
         try:
             self._cobj = arr.__array_struct__
@@ -173,7 +176,7 @@ def format_strides(nd, strides):
     return ", ".join([str(strides[i]) for i in range(nd)])
 
 
-class Exporter:
+class Exporter(object):
     def __init__(
         self, shape, typekind=None, itemsize=None, strides=None, descr=None, flags=None
     ):
@@ -262,7 +265,7 @@ class Array(Exporter):
     }
 
     def __init__(self, *args, **kwds):
-        super().__init__(*args, **kwds)
+        super(Array, self).__init__(*args, **kwds)
         try:
             if self.flags & PAI_NOTSWAPPED:
                 ct = self._ctypes[self.typekind, self.itemsize]
@@ -288,7 +291,7 @@ class Array(Exporter):
             raise ValueError("wrong number of indexes")
         for i in range(self.nd):
             if not (0 <= key[i] < self.shape[i]):
-                raise IndexError(f"index {i} out of range")
+                raise IndexError("index {} out of range".format(i))
         return self.data + sum(i * s for i, s in zip(key, self.strides))
 
 

@@ -102,7 +102,8 @@ def main():
                 blendimage.fill(color, None, blendtype)
                 screen.blit(blendimage, (200, 10))
                 print(
-                    f"Color: {tuple(color)}, Pixel (0,0): {[blendimage.get_at((0, 0))]}"
+                    "Color: %s, Pixel (0,0): %s"
+                    % (tuple(color), [blendimage.get_at((0, 0))])
                 )
                 changed = False
                 pg.display.flip()

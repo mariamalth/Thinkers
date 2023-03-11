@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import sys
 import os
 import unittest
@@ -33,9 +35,10 @@ CONFIGS = [
 CONFIG = {"frequency": 44100, "size": 32, "channels": 2, "allowedchanges": 0}
 
 
-class InvalidBool:
+class InvalidBool(object):
     """To help test invalid bool values."""
 
+    __nonzero__ = None
     __bool__ = None
 
 
@@ -176,12 +179,12 @@ class MixerModuleTest(unittest.TestCase):
         emsg = "Expected object with buffer interface: got a list"
         self.assertEqual(str(cm.exception), emsg)
 
-        ufake_path = "12345678"
+        ufake_path = str("12345678")
         self.assertRaises(IOError, mixer.Sound, ufake_path)
         self.assertRaises(IOError, mixer.Sound, "12345678")
 
         with self.assertRaises(TypeError) as cm:
-            mixer.Sound(buffer="something")
+            mixer.Sound(buffer=str("something"))
         emsg = "Unicode object not allowed as buffer object"
         self.assertEqual(str(cm.exception), emsg)
         self.assertEqual(get_bytes(mixer.Sound(buffer=sample)), sample)
@@ -208,13 +211,13 @@ class MixerModuleTest(unittest.TestCase):
         import shutil
 
         ep = example_path("data")
-        temp_file = os.path.join(ep, "你好.wav")
-        org_file = os.path.join(ep, "house_lo.wav")
+        temp_file = os.path.join(ep, u"你好.wav")
+        org_file = os.path.join(ep, u"house_lo.wav")
         shutil.copy(org_file, temp_file)
         try:
             with open(temp_file, "rb") as f:
                 pass
-        except OSError:
+        except IOError:
             raise unittest.SkipTest("the path cannot be opened")
 
         try:
@@ -247,7 +250,7 @@ class MixerModuleTest(unittest.TestCase):
         format_list = [-8, 8, -16, 16]
         channels_list = [1, 2]
 
-        a_lists = {f: [] for f in format_list}
+        a_lists = dict((f, []) for f in format_list)
         a32u_mono = arange(0, 256, 1, uint32)
         a16u_mono = a32u_mono.astype(uint16)
         a8u_mono = a32u_mono.astype(uint8)
@@ -1182,28 +1185,6 @@ class SoundTypeTest(AssertRaisesRegexMixin, unittest.TestCase):
             pygame.mixer.quit()
             with self.assertRaisesRegex(pygame.error, "mixer not initialized"):
                 snd.get_raw()
-
-    def test_correct_subclassing(self):
-        class CorrectSublass(mixer.Sound):
-            def __init__(self, file):
-                super().__init__(file=file)
-
-        filename = example_path(os.path.join("data", "house_lo.wav"))
-        correct = CorrectSublass(filename)
-
-        try:
-            correct.get_volume()
-        except Exception:
-            self.fail("This should not raise an exception.")
-
-    def test_incorrect_subclassing(self):
-        class IncorrectSuclass(mixer.Sound):
-            def __init__(self):
-                pass
-
-        incorrect = IncorrectSuclass()
-
-        self.assertRaises(RuntimeError, incorrect.get_volume)
 
 
 ##################################### MAIN #####################################

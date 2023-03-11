@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import platform
@@ -39,7 +41,7 @@ class MixerMusicModuleTest(unittest.TestCase):
     def music_load(self, format):
         data_fname = example_path("data")
 
-        path = os.path.join(data_fname, f"house_lo.{format}")
+        path = os.path.join(data_fname, "house_lo.%s" % format)
         if os.sep == "\\":
             path = path.replace("\\", "\\\\")
         umusfn = str(path)
@@ -53,7 +55,7 @@ class MixerMusicModuleTest(unittest.TestCase):
         formats = ["ogg", "wav"]
         data_fname = example_path("data")
         for f in formats:
-            path = os.path.join(data_fname, f"house_lo.{f}")
+            path = os.path.join(data_fname, "house_lo.%s" % f)
             if os.sep == "\\":
                 path = path.replace("\\", "\\\\")
             bmusfn = path.encode()
@@ -66,7 +68,7 @@ class MixerMusicModuleTest(unittest.TestCase):
         formats = ["wav", "ogg"]
         data_fname = example_path("data")
         for f in formats:
-            path = os.path.join(data_fname, f"house_lo.{f}")
+            path = os.path.join(data_fname, "house_lo.%s" % f)
             if os.sep == "\\":
                 path = path.replace("\\", "\\\\")
             bmusfn = path.encode()
@@ -89,13 +91,13 @@ class MixerMusicModuleTest(unittest.TestCase):
         import shutil
 
         ep = example_path("data")
-        temp_file = os.path.join(ep, "你好.wav")
-        org_file = os.path.join(ep, "house_lo.wav")
+        temp_file = os.path.join(ep, u"你好.wav")
+        org_file = os.path.join(ep, u"house_lo.wav")
         try:
             with open(temp_file, "w") as f:
                 pass
             os.remove(temp_file)
-        except OSError:
+        except IOError:
             raise unittest.SkipTest("the path cannot be opened")
         shutil.copy(org_file, temp_file)
         try:
@@ -109,7 +111,7 @@ class MixerMusicModuleTest(unittest.TestCase):
         import tempfile
 
         ep = example_path("data")
-        org_file = os.path.join(ep, "house_lo.wav")
+        org_file = os.path.join(ep, u"house_lo.wav")
         tmpfd, tmppath = tempfile.mkstemp(".wav")
         os.close(tmpfd)
         shutil.copy(org_file, tmppath)

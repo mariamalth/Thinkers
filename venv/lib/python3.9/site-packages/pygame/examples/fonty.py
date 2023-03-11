@@ -10,7 +10,6 @@ Demonstrating several Font object attributes.
 """
 import pygame as pg
 
-
 def main():
     # initialize
     pg.init()
@@ -31,11 +30,11 @@ def main():
     text = "Fonty"
     size = font.size(text)
 
-    # no AA, no transparency, normal
+    # no AA, no transparancy, normal
     ren = font.render(text, 0, fg, bg)
     screen.blit(ren, (10, 10))
 
-    # no AA, transparency, underline
+    # no AA, transparancy, underline
     font.set_underline(1)
     ren = font.render(text, 0, fg)
     screen.blit(ren, (10, 40 + size[1]))
@@ -43,28 +42,28 @@ def main():
 
     a_sys_font = pg.font.SysFont("Arial", 60)
 
-    # AA, no transparency, bold
+    # AA, no transparancy, bold
     a_sys_font.set_bold(1)
     ren = a_sys_font.render(text, 1, fg, bg)
     screen.blit(ren, (30 + size[0], 10))
     a_sys_font.set_bold(0)
 
-    # AA, transparency, italic
+    # AA, transparancy, italic
     a_sys_font.set_italic(1)
     ren = a_sys_font.render(text, 1, fg)
     screen.blit(ren, (30 + size[0], 40 + size[1]))
     a_sys_font.set_italic(0)
 
     # Get some metrics.
-    print(f"Font metrics for 'Fonty':  {a_sys_font.metrics(text)}")
+    print("Font metrics for 'Fonty':  %s" % a_sys_font.metrics(text))
     ch = "\u3060"
-    msg = f"Font metrics for '{ch}':  {a_sys_font.metrics(ch)}"
+    msg = "Font metrics for '%s':  %s" % (ch, a_sys_font.metrics(ch))
     print(msg)
 
     ## #some_japanese_unicode = u"\u304b\u3070\u306b"
     ##some_japanese_unicode = unicode_('%c%c%c') % (0x304b, 0x3070, 0x306b)
 
-    # AA, transparency, italic
+    # AA, transparancy, italic
     ##ren = a_sys_font.render(some_japanese_unicode, 1, fg)
     ##screen.blit(ren, (30 + size[0], 40 + size[1]))
 

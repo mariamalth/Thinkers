@@ -1,7 +1,6 @@
 from os import PathLike
-from typing import IO, Callable, Sequence, Tuple, Union
+from typing import IO, List, Sequence, Tuple, Union
 
-from typing_extensions import Literal as Literal
 from typing_extensions import Protocol
 
 from pygame.color import Color
@@ -9,29 +8,27 @@ from pygame.math import Vector2
 from pygame.rect import Rect
 
 # For functions that take a file name
-AnyPath = Union[str, bytes, PathLike[str], PathLike[bytes]]
+_AnyPath = Union[str, bytes, PathLike[str], PathLike[bytes]]
 
 # Most pygame functions that take a file argument should be able to handle
-# a FileArg type
-FileArg = Union[AnyPath, IO[bytes], IO[str]]
+# a _FileArg type
+_FileArg = Union[_AnyPath, IO[bytes], IO[str]]
 
-Coordinate = Union[Tuple[float, float], Sequence[float], Vector2]
+_Coordinate = Union[Tuple[float, float], Sequence[float], Vector2]
 
 # This typehint is used when a function would return an RGBA tuble
-RGBAOutput = Tuple[int, int, int, int]
-ColorValue = Union[Color, int, str, Tuple[int, int, int], RGBAOutput, Sequence[int]]
+_RgbaOutput = Tuple[int, int, int, int]
+_ColorValue = Union[Color, int, str, Tuple[int, int, int], List[int], _RgbaOutput]
 
 _CanBeRect = Union[
     Rect,
     Tuple[int, int, int, int],
-    Tuple[Coordinate, Coordinate],
-    Sequence[int],
-    Sequence[Coordinate],
+    List[int],
+    Tuple[_Coordinate, _Coordinate],
+    List[_Coordinate],
 ]
 
 class _HasRectAttribute(Protocol):
-    # An object that has a rect attribute that is either a rect, or a function
-    # that returns a rect confirms to the rect protocol
-    rect: Union[RectValue, Callable[[], RectValue]]
+    rect: _CanBeRect
 
-RectValue = Union[_CanBeRect, _HasRectAttribute]
+_RectValue = Union[_CanBeRect, _HasRectAttribute]

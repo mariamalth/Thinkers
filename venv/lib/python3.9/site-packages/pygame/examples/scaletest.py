@@ -91,7 +91,7 @@ def main(imagefile, convert_alpha=False, run_speed_test=False):
 
 
 def SpeedTest(image):
-    print(f"\nImage Scaling Speed Test - Image Size {str(image.get_size())}\n")
+    print("\nImage Scaling Speed Test - Image Size %s\n" % str(image.get_size()))
 
     imgsize = [image.get_width(), image.get_height()]
     duration = 0.0
@@ -103,7 +103,9 @@ def SpeedTest(image):
         duration += time.time() - start
         del tempimg
 
-    print(f"Average transform.smoothscale shrink time: {duration / 128 * 1000:.4f} ms.")
+    print(
+        "Average transform.smoothscale shrink time: %.4f ms." % (duration / 128 * 1000)
+    )
 
     duration = 0.0
     for i in range(128):
@@ -114,7 +116,9 @@ def SpeedTest(image):
         duration += time.time() - start
         del tempimg
 
-    print(f"Average transform.smoothscale expand time: {duration / 128 * 1000:.4f} ms.")
+    print(
+        "Average transform.smoothscale expand time: %.4f ms." % (duration / 128 * 1000)
+    )
 
     duration = 0.0
     for i in range(128):
@@ -125,7 +129,7 @@ def SpeedTest(image):
         duration += time.time() - start
         del tempimg
 
-    print(f"Average transform.scale shrink time: {duration / 128 * 1000:.4f} ms.")
+    print("Average transform.scale shrink time: %.4f ms." % (duration / 128 * 1000))
 
     duration = 0.0
     for i in range(128):
@@ -136,13 +140,13 @@ def SpeedTest(image):
         duration += time.time() - start
         del tempimg
 
-    print(f"Average transform.scale expand time: {duration / 128 * 1000:.4f} ms.")
+    print("Average transform.scale expand time: %.4f ms." % (duration / 128 * 1000))
 
 
 if __name__ == "__main__":
     # check input parameters
     if len(sys.argv) < 2:
-        print(f"\nUsage: {sys.argv[0]} imagefile [-t] [-convert_alpha]")
+        print("\nUsage: %s imagefile [-t] [-convert_alpha]" % sys.argv[0])
         print("    imagefile       image filename (required)")
         print("    -t              run speed test")
         print("    -convert_alpha  use convert_alpha() on the image's " "surface\n")
