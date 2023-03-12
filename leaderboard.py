@@ -34,7 +34,7 @@ rect_y = SCREEN_HEIGHT - RECT_HEIGHT
 pygame.init()
 
 ### CODE TO PLAY VIDEO BACKGROUND IN PYGAME WINDOW
-video = cv2.VideoCapture("background.mp4")
+video = cv2.VideoCapture("Linescape1.0.mp4")
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
 

@@ -13,6 +13,7 @@ import time
 import string
 import random
 from csv import writer
+import numpy as np
 from pyvidplayer import Video
  
 
@@ -32,6 +33,7 @@ SCREEN_WIDTH = background_image.get_width()
 SCREEN_HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Jumping Rectangle")
+camera = cv2.VideoCapture(0)
 
 
 
@@ -80,12 +82,18 @@ def detectPose(image, pose):
     # Check if any landmarks are detected and are specified to be drawn.
     if results.pose_landmarks:
         # Draw Pose Landmarks on the output image.
-        mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
+        # mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
+        #                           connections=mp_pose.POSE_CONNECTIONS,
+        #                           landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255),
+        #                                                                        thickness=10, circle_radius=3),
+        #                           connection_drawing_spec=mp_drawing.DrawingSpec(color=(49,125,237),
+        #                                                                        thickness=200, circle_radius=2))
+         mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
                                   connections=mp_pose.POSE_CONNECTIONS,
                                   landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255),
-                                                                               thickness=3, circle_radius=3),
+                                                                               thickness=10, circle_radius=3),
                                   connection_drawing_spec=mp_drawing.DrawingSpec(color=(49,125,237),
-                                                                               thickness=2, circle_radius=2))
+                                                                               thickness=100, circle_radius=2))
     return output_image, results
     
 
@@ -330,11 +338,11 @@ while camera_video.isOpened():
 
                     #STORING TEST -> this will be moved to a place where it stores row after user loses last life
                     # -> should also check if user score makes it to leaderboard
-                    with open('leaderboard.csv', 'a+', newline='\n') as write_obj:
-                     # Create a writer object from csv module
-                     csv_writer = writer(write_obj)
-                     # Add contents of list as last row in the csv file
-                     csv_writer.writerow(user_score)
+                    # with open('leaderboard.csv', 'a+', newline='\n') as write_obj:
+                    #  # Create a writer object from csv module
+                    #  csv_writer = writer(write_obj)
+                    #  # Add contents of list as last row in the csv file
+                    #  csv_writer.writerow(user_score)
                                     
                 #--------------------------------------------------------------------------------------------------------------
                 # Check if the game has not started yet.
@@ -453,6 +461,13 @@ while camera_video.isOpened():
 
     # Draw the screen
     screen.blit(background_image, (0, 0))
+    ret, frame = camera.read()
+		
+    screen.fill([0,0,0])
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = np.rot90(frame)
+    frame = pygame.surfarray.make_surface(frame)
+    screen.blit(frame, (0,0))
     pygame.draw.rect(screen, (255, 165, 0), (rect_x, rect_y, RECT_WIDTH, RECT_HEIGHT))
     pygame.display.update()
 
