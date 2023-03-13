@@ -1,6 +1,8 @@
 import pygame
 import random
 import cv2
+import time
+import datetime
 # initialize Pygame
 pygame.init()
 
@@ -9,9 +11,19 @@ background_image = pygame.image.load("background.png")
 WIDTH = background_image.get_width()
 HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-video = cv2.VideoCapture("background.mp4")
+video = cv2.VideoCapture("background2.mp4")
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
+video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+duration = video_length/fps
+
+#variables for video loop
+i = 0
+start = datetime.datetime.now()
+start2 = datetime.datetime.now()
+last = start
+last2 = start2
+
 
 window = pygame.display.set_mode(video_image.shape[1::-1])
 pygame.display.set_caption("Endless Runner")
@@ -36,30 +48,30 @@ class Player(pygame.sprite.Sprite):
         self.speed = 5
         self.attack_animation = False
         self.sprites = []
-        self.sprites.append(pygame.image.load('0001.png'))
-        self.sprites.append(pygame.image.load('0002.png'))
-        self.sprites.append(pygame.image.load('0003.png'))
-        self.sprites.append(pygame.image.load('0004.png'))
-        self.sprites.append(pygame.image.load('0005.png'))
-        self.sprites.append(pygame.image.load('0006.png'))
-        self.sprites.append(pygame.image.load('0007.png'))
-        self.sprites.append(pygame.image.load('0008.png'))
-        self.sprites.append(pygame.image.load('0009.png'))
-        self.sprites.append(pygame.image.load('0010.png'))
-        self.sprites.append(pygame.image.load('0011.png'))
-        self.sprites.append(pygame.image.load('0012.png'))
-        self.sprites.append(pygame.image.load('0013.png'))
-        self.sprites.append(pygame.image.load('0014.png'))
-        self.sprites.append(pygame.image.load('0015.png'))
-        self.sprites.append(pygame.image.load('0016.png'))
-        self.sprites.append(pygame.image.load('0017.png'))
-        self.sprites.append(pygame.image.load('0018.png'))
-        self.sprites.append(pygame.image.load('0019.png'))
-        self.sprites.append(pygame.image.load('0020.png'))
-        self.sprites.append(pygame.image.load('0021.png'))
-        self.sprites.append(pygame.image.load('0022.png'))
-        self.sprites.append(pygame.image.load('0023.png'))
-        self.sprites.append(pygame.image.load('0024.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0001.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0002.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0003.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0004.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0005.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0006.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0007.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0008.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0009.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0010.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0011.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0012.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0013.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0014.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0015.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0016.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0017.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0018.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0019.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0020.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0021.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0022.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0023.png'))
+        self.sprites.append(pygame.image.load('character_sprite/0024.png'))
         self.current_sprite = 0
         self.image = self.sprites[self.current_sprite]
         self.rect = pygame.Rect(self.get_position_x(), HEIGHT - 50, 50, 50)
@@ -239,11 +251,41 @@ while player.lives > 0:
             score += 5
             
     score += 0.01
+    
     #play video
     success, video_image = video.read()
     if success: 
-         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")    
+    
     window.blit(video_surf, (0, 0))
+
+
+    #loop video
+    def loop_video(now,last2):
+        print("loop")
+        now = datetime.datetime.now()
+        while now - last2 < datetime.timedelta(seconds=duration):
+            print(datetime.timedelta(seconds=duration))
+            last2 = now
+            window.fill([0,0,0])
+        return now
+
+        # video = cv2.VideoCapture("background2.mp4")
+        # success, video_image = video.read()
+        # if success: 
+        #  video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")    
+        #  window.blit(video_surf, (0, 0))
+
+
+    #problem is it only shows loop for a second then goes to image
+    i += 1
+    now = datetime.datetime.now()
+    if now - last > datetime.timedelta(seconds=duration):
+        print(datetime.timedelta(seconds=duration))
+        # last = now
+        last = loop_video(now,last2)
+    
+    
     # draw the sprites and score to the screen
     player.attack()
     # screen.blit(background_image, (0, 0))

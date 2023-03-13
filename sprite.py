@@ -1,6 +1,13 @@
 import pygame, sys
 pygame.init()
 clock = pygame.time.Clock()
+#Code that can be used potentially for stick figure in environment background
+    # def put_array(surface, myarr):          # put array into surface
+    #     bv = surface.get_view("0")
+    #     bv.write(myarr.tostring())
+    # if results.segmentation_mask is not None:
+    #     mask = results.segmentation_mask
+    #     put_array(screen,mask)
 
 background_image = pygame.image.load("linescape_stopmotion/Linescape1.0.0.png")
 SCREEN_WIDTH = background_image.get_width()

@@ -23,10 +23,8 @@ from pyvidplayer import Video
 pygame.init()
 
 background_image = pygame.image.load("background.png")
-
 ## video background 
-video = Video("background.mp4")
-video.set_size((1270,720))
+video = cv2.VideoCapture("background2.mp4")
 
 # Set up the screen
 SCREEN_WIDTH = background_image.get_width()
@@ -34,10 +32,6 @@ SCREEN_HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Jumping Rectangle")
 camera = cv2.VideoCapture(0)
-
-
-
-
 
 # Set up the rectangle
 RECT_WIDTH = SCREEN_WIDTH * 0.08
@@ -53,9 +47,83 @@ GRAVITY = 0.5
 RECT_CROUCH_HEIGHT = RECT_HEIGHT // 2
 is_crouching = False
 
+# set up the colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+
 #Set up Data storing mechanisms
 username = None
 score = 0 
+
+# def size(s,b,d):
+#     return (d*b) / s
+# define the Obstacle class
+class Obstacle(pygame.sprite.Sprite):
+    s_line = 34 / 2
+    b_line = 752 / 2
+    distance = 370
+    side = (distance) / (1-(s_line/b_line))
+    speed = 0.5
+    def __init__(self, position, style):
+        super().__init__()
+        self.style = style
+        self.position = position
+        self.color = self.get_color()
+        self.height = self.get_height()
+        self.width = self.get_width()
+        self.y = self.get_position_y()
+        self.x = self.get_position_x()
+    
+    def get_color(self):
+        if self.style == "stand":
+            return BLUE
+        elif self.style == "crouch":
+            return BLACK
+        else:
+            return GREEN
+    # def get_height(self):
+    #     initial_size = HEIGHT * 0.01
+    #     if self.style == "stand":
+    #         return initial_size
+    #     else:  # Crouching or Jumping
+    #         return initial_size / 2
+        
+    # def get_width(self):
+    #     if self.style == "stand":
+    #         return self.height / 2
+    #     else:  # Crouching or Jumping
+    #         return self.height
+    
+    # def get_position_y(self):
+    #     start_point = HEIGHT - Obstacle.distance - self.height
+    #     if self.style == "crouch":
+    #         return start_point - self.height
+    #     else:  # Standing or jumping
+    #         return start_point
+    
+    # def get_position_x(self):
+    #     center_x = WIDTH / 2 - self.width / 2
+    #     if self.position == "left":
+    #         return center_x - self.width * 3.5
+    #     elif self.position == "right":
+    #         return center_x + self.width * 3.5
+    #     else:  # center
+    #         return center_x
+
+    def update(self):
+        # start_point = HEIGHT - Obstacle.distance - self.height
+        # move the obstacle down the screen
+        self.y += Obstacle.speed + self.height / 100 
+        # d = (self.y - start_point) + (Obstacle.side - Obstacle.distance)
+        # rate = (size(Obstacle.side,Obstacle.b_line,d)) / (Obstacle.s_line)
+        # self.height = self.get_height() * rate
+        # self.width = self.get_width()
+        # self.x = self.get_position_x()
+        
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.width, self.height)
 
 ### SETTING UP THE MOTION DETECTION
 
@@ -66,7 +134,7 @@ pose_image = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, 
  
 # Setup the Pose function for videos.
 pose_video = mp_pose.Pose(static_image_mode=False, model_complexity=1, min_detection_confidence=0.7,
-                          min_tracking_confidence=0.7)
+                          min_tracking_confidence=0.7,enable_segmentation=True)
  
 # Initialize mediapipe drawing class.
 mp_drawing = mp.solutions.drawing_utils 
@@ -75,6 +143,13 @@ mp_drawing = mp.solutions.drawing_utils
 def detectPose(image, pose): 
     # Create a copy of the input image.
     output_image = image.copy()
+    success, video_image = video.read()
+    if success: 
+        # video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+        output_image = video_image
+    
+    background_image = cv2.imread("linescape_stopmotion/Linescape1.0.0.png")
+    output_image = background_image
     # Convert the image from BGR into RGB format.
     imageRGB = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     # Perform the Pose Detection.
@@ -82,20 +157,15 @@ def detectPose(image, pose):
     # Check if any landmarks are detected and are specified to be drawn.
     if results.pose_landmarks:
         # Draw Pose Landmarks on the output image.
-        # mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
-        #                           connections=mp_pose.POSE_CONNECTIONS,
-        #                           landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255),
-        #                                                                        thickness=10, circle_radius=3),
-        #                           connection_drawing_spec=mp_drawing.DrawingSpec(color=(49,125,237),
-        #                                                                        thickness=200, circle_radius=2))
          mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
                                   connections=mp_pose.POSE_CONNECTIONS,
-                                  landmark_drawing_spec=mp_drawing.DrawingSpec(color=(255,255,255),
-                                                                               thickness=10, circle_radius=3),
-                                  connection_drawing_spec=mp_drawing.DrawingSpec(color=(49,125,237),
+                                  landmark_drawing_spec=mp_drawing.DrawingSpec(color=(228,221,19),
+                                                                               thickness=0, circle_radius=0),
+                                  connection_drawing_spec=mp_drawing.DrawingSpec(color=(228,221,19),
                                                                                thickness=100, circle_radius=2))
+    # mp_drawing.plot_landmarks(results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
     return output_image, results
-    
+
 
 def checkHandsJoined(image, results):    
     # Get the height and width of the input image.
@@ -269,7 +339,7 @@ while camera_video.isOpened():
         continue
     
     # Flip the frame horizontally for natural (selfie-view) visualization.
-    frame = cv2.flip(frame, 1)
+    frame = cv2.flip(frame,1)
     
     # Get the height and width of the frame of the webcam video.
     frame_height, frame_width, _ = frame.shape
@@ -458,16 +528,23 @@ while camera_video.isOpened():
         rect_vel_y = 0
         
     
-
     # Draw the screen
     screen.blit(background_image, (0, 0))
-    ret, frame = camera.read()
+    # ret, frame = camera.read()
 		
-    screen.fill([0,0,0])
+    # screen.fill([0,0,0])
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    frame = np.rot90(frame)
+    frame = np.rot90(frame, axes=(1,0))
+    frame = np.flip(frame,1)
     frame = pygame.surfarray.make_surface(frame)
     screen.blit(frame, (0,0))
+
+    if results.segmentation_mask is not None: 
+         rgb = cv2.cvtColor(results.segmentation_mask, cv2.COLOR_GRAY2RGB)
+         rgb = rgb * 255
+         rgb = rgb.astype(np.uint8)
+        #  screen.blit(rgb)
+
     pygame.draw.rect(screen, (255, 165, 0), (rect_x, rect_y, RECT_WIDTH, RECT_HEIGHT))
     pygame.display.update()
 
