@@ -15,6 +15,7 @@ import random
 from csv import writer
 import numpy as np
 from pyvidplayer import Video
+# from protobuf_to_dict import protobuf_to_dict #one potential way to extract landmarks into dictionary
  
 
 ### SETTING UP THE GAME
@@ -56,6 +57,9 @@ GREEN = (0, 255, 0)
 #Set up Data storing mechanisms
 username = None
 score = 0 
+
+#store landmarks - as a list, can be changed
+landmarks = []
 
 # def size(s,b,d):
 #     return (d*b) / s
@@ -156,6 +160,7 @@ def detectPose(image, pose):
     results = pose.process(imageRGB)
     # Check if any landmarks are detected and are specified to be drawn.
     if results.pose_landmarks:
+        #  print(type(results.pose_landmarks))
         # Draw Pose Landmarks on the output image.
          mp_drawing.draw_landmarks(image=output_image, landmark_list=results.pose_landmarks,
                                   connections=mp_pose.POSE_CONNECTIONS,
@@ -163,6 +168,13 @@ def detectPose(image, pose):
                                                                                thickness=0, circle_radius=0),
                                   connection_drawing_spec=mp_drawing.DrawingSpec(color=(228,221,19),
                                                                                thickness=100, circle_radius=2))
+         #way of extracting landmarks, data_point is float type
+         #can use this loop to add onto landmark list
+        #  [
+        #     print('x is', data_point.x, 'y is', data_point.y, 'z is', data_point.z,
+        #   'visibility is', data_point.visibility)
+        #     for data_point in results.pose_landmarks.landmark
+        #     ]  
     # mp_drawing.plot_landmarks(results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
     return output_image, results
 

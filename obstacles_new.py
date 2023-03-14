@@ -616,14 +616,14 @@ while camera_video.isOpened():
     screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
     screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
     moving_sprites.draw(screen)
-    moving_sprites.update(0.75)
+    moving_sprites.update(1)
 
     if player.lives == 0:
-         times = 600
+         times = 1200
          while times >0:
             screen.blit(font2.render(f"game over.. restarting", True, GREEN), (WIDTH//4, HEIGHT//2))
             obstacles.empty()
-            passed_time = clock.tick(90)
+            passed_time = clock.tick(120)
             times -= passed_time
             if times == 0:
                 player.lives+=3
@@ -631,4 +631,4 @@ while camera_video.isOpened():
     pygame.display.update()
         
         # control the frame rate
-    clock.tick(90)
+    clock.tick(120)
