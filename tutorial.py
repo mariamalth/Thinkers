@@ -21,6 +21,9 @@ video = cv2.VideoCapture("background2.mp4")
 success, video_image = video.read()
 video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
+#list of image backgrounds 
+images = []
+
 fps = video.get(cv2.CAP_PROP_FPS)
 
 window = pygame.display.set_mode(video_image.shape[1::-1])
@@ -34,8 +37,15 @@ GREEN = (0, 255, 0)
 
 #setting up the tutorial
 
-# Initialize a variable to store the state of the tutorial (completed or not).
+# Initialize variables to store the state of the tutorial.
+#TO DO make it so at the end of each game, if the player chooses not to restart, reset all these variables
 tutorial_completed = False 
+tutorial_hands_joined = False
+tutorial_point = "not started"
+
+positions_moved = []
+
+obstacles_avoided = 0
 
 ### SETTING UP THE MOTION DETECTION
 
@@ -59,6 +69,7 @@ def detectPose(image, pose):
     # Perform the Pose Detection.
     results = pose.process(imageRGB)
     # Check if any landmarks are detected and are specified to be drawn.
+    print(results)
     return results
     
 
@@ -357,8 +368,8 @@ class Player(pygame.sprite.Sprite):
         pygame.draw.line(screen, BLACK, self.r_leg_1, self.r_leg_2, self.stick_thickness)
      
         # Arms
-        pygame.draw.line(screen, GREEN, self.l_arm_1, self.l_arm_2, self.stick_thickness)
-        pygame.draw.line(screen, BLUE, self.r_arm_1, self.r_arm_2, self.stick_thickness)
+        pygame.draw.line(screen, BLACK, self.l_arm_1, self.l_arm_2, self.stick_thickness)
+        pygame.draw.line(screen, BLACK, self.r_arm_1, self.r_arm_2, self.stick_thickness)
         
         # pygame.draw.line(screen, GREEN, self.l_hand_1, self.l_hand_2, self.stick_thickness)
         # pygame.draw.line(screen, BLUE, self.r_hand_1, self.r_hand_2, self.stick_thickness)
@@ -559,9 +570,14 @@ while camera_video.isOpened():
         # Command to Start or resume the game.
         #------------------------------------------------------------------------------------------------------------------
         
-        # Check if the left and right hands are joined & the tutorial is completed.
+        # Check if the left and right hands are joined
         if checkHandsJoined(frame, results) == 'Hands Joined':
- 
+
+            #if hands joined for the first time, set tutorial hands completed to actually start tutorial and move from welcome screen
+            tutorial_hands_joined = True
+
+            #change tutorial point to first point, the motion detection highlight
+            tutorial_point = "motion detection highlight"
             # Increment the count of consecutive frames with +ve condition.
             counter += 1
  
@@ -572,8 +588,8 @@ while camera_video.isOpened():
                 #----------------------------------------------------------------------------------------------------------
                                     
                 #--------------------------------------------------------------------------------------------------------------
-                # Check if the game has not started yet.
-                if not(game_started):
+                # Check if the game has not started yet but tutorial is completed.
+                if not(game_started) & tutorial_completed:
  
                     # Update the value of the variable that stores the game state.
                     game_started = True
@@ -653,7 +669,85 @@ while camera_video.isOpened():
     # update the sprites
     player.update(movement,l_arm_theta, r_arm_theta)
     obstacles.update()
-    if game_started:
+    
+    #video will be constantly playing, tutorial or not.
+    success, video_image = video.read()
+    if success: 
+        video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+    window.blit(video_surf, (0, 0))
+    
+    #Display the welcome screen
+    if not tutorial_hands_joined:
+        welcome = font.render("welcome...", True, WHITE)
+        text = font.render("join your hands to start", True, WHITE)
+        screen.blit(welcome, (WIDTH / 2 - welcome.get_rect().width / 2, HEIGHT / 4))
+        screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 2))
+        player.draw()
+    
+    # All the different points and screens of the tutorial
+    if tutorial_hands_joined:
+        if tutorial_point=="motion detection highlight":
+            #encourage user to move left and right and move arms around
+            tutorial_text = font.render("highlight this experience is based on motion detection ", True, WHITE)
+            screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+            
+            #check that they moved around screen
+            if player.current_position not in positions_moved:
+                positions_moved.append(player.current_position)
+            
+            #once done, change tutorial point 
+            if len(positions_moved) ==3:
+                tutorial_point = "obstacles highlight"
+            
+        if tutorial_point == "obstacles highlight":
+            tutorial_text = font.render("showing obstacles coming towards them", True, WHITE)
+            screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+            for obstacle in obstacles:
+                if player.get_rect().colliderect(obstacle.get_rect()):
+                    # the player has collided with an obstacle, so notify them 
+                    obstacles.empty()
+                    # notify_text = font.render("let's try that again!", True, WHITE)
+                    # screen.blit(notify_text, (WIDTH / 2 - notify_text.get_rect().width / 2, HEIGHT / 2))
+                    # times1 = 1200
+                    # while times1 >0:
+                    #     obstacles.empty()
+                    #     #only shows for a second
+                    #     screen.blit(notify_text, (WIDTH / 2 - notify_text.get_rect().width / 2, HEIGHT / 3))
+                    #     passed_time = clock.tick(120)
+                    #     times1 -= passed_time
+                
+                ## TO DO: if successfully avoided 3 obstacles, move to next tutorial point - need to work on altering HEIGHT
+                if obstacle.y > HEIGHT-30: 
+                    if not player.get_rect().colliderect(obstacle.get_rect()):
+                        obstacles_avoided+=1
+                    
+            # add obstacles
+            current_time = pygame.time.get_ticks() 
+            # multiply last spawn time by 1.5 to slow the obstacles down for the tutorial
+            if current_time - last_spawn_time*1.5 > spawn_time:
+                last_spawn_time = current_time
+                position = random.choice(["center","left","right"])
+                style = "stand"
+                obstacle = Obstacle(position,style)
+                obstacles.add(obstacle)
+            
+            # remove obstacles that have gone off the bottom of the screen
+            for obstacle in obstacles:
+                if obstacle.y > HEIGHT:
+                    obstacles.remove(obstacle)
+
+        for obstacle in obstacles:
+            pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
+
+
+    if tutorial_point == "movement for obstacles highlight":
+        print(0)
+    if tutorial_point == "different obstacle types highilght":
+        print("tutorial completed, go to start screen")
+          
+    player.draw()
+
+    if game_started & tutorial_completed:
         
         for obstacle in obstacles:
             if player.get_rect().colliderect(obstacle.get_rect()):
@@ -696,21 +790,18 @@ while camera_video.isOpened():
                 score += 5
                 
         score += 0.1
-    #play video
-    success, video_image = video.read()
-    if success: 
-            video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
-
-    window.blit(video_surf, (0, 0))
 
     for obstacle in obstacles:
         pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
-    if not game_started:
-        text = font.render("join your hands to start", True, WHITE)
-        screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 4))
-    screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
-    screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
-    player.draw()
+    
+    #join hands for the game to start after tutorial is completed
+    if tutorial_completed:
+        if not game_started:
+            text = font.render("join your hands to start", True, WHITE)
+            screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 4))
+        screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
+        screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
+        player.draw()
     
     if player.lives == 0:
          times = 1200
@@ -723,6 +814,6 @@ while camera_video.isOpened():
                 player.lives+=3
                 score = 0
     pygame.display.update()
-        
-        # control the frame rate
+            
+    # control the frame rate
     clock.tick(120)

@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
 		self.current_position = "center"
 		self.attack_animation = False
 		self.sprites = []
-		self.sprites.append(pygame.image.load('0001.png'))
+		self.sprites.append(pygame.image.load('character_sprite/0001.png'))
 		# self.sprites.append(pygame.image.load('0002.png'))
 		# self.sprites.append(pygame.image.load('0003.png'))
 		# self.sprites.append(pygame.image.load('0004.png'))
@@ -124,14 +124,16 @@ while True:
 		
 
 	# Drawing
+	# screen.blit(background_image, (0, 0))
 	n = 0
-	# while n !=121:
-	# 	background_image = pygame.image.load(f"linescape_stopmotion/Linescape1.0.{n}.png")
-	# 	screen.blit(background_image, (0, 0))
-	# 	if n !=120:
-	# 		n+=1
-	# 	else: 
-	# 		n=0
+	while n !=121:
+		background_image = pygame.image.load(f"linescape_stopmotion/Linescape1.0.{n}.png")
+		# print(n)
+		screen.blit(background_image, (0, 0))
+		if n < 121:
+			n+=1
+		else: 
+			n=0
 	screen.blit(background_image, (0, 0))
 	pygame.draw.rect(screen, (255,0,0), player.hitbox)
 	# pygame.draw.rect(screen,(255,0,255),player.rect)

@@ -1,7 +1,7 @@
 import pygame as pg
 import cv2
 
-
+#LOOP WORKS
 pg.init()
 background_image = pg.image.load("linescape_stopmotion/Linescape1.0.0.png")
 WIDTH = background_image.get_width()
@@ -40,7 +40,7 @@ image = images[index]
 # Define a new event type.
 CHANGE_IMAGE_EVENT = pg.USEREVENT + 1
 # Add the event to the event queue every 1000 ms.
-pg.time.set_timer(CHANGE_IMAGE_EVENT, 20)
+pg.time.set_timer(CHANGE_IMAGE_EVENT, 15)
 
 done = False
 while True:

@@ -9,6 +9,19 @@ import string
 import random
 from csv import writer
 
+
+data = pd.read_csv("leaderboard.csv")
+data = data.sort_values(by=['Score'], ascending=False)
+data = data.head(10)
+print(data)
+usernames = data.loc[:,"Username"]
+
+for row in usernames:
+    score = data.loc[data['Username'] == row]['Score'].values
+
+csv_save = data
+csv_save.to_csv("leaderboard.csv", index=False)
+
 background_image = pygame.image.load("background.png")
 
 ### SETTING UP THE GAME
@@ -16,9 +29,6 @@ SCREEN_WIDTH = background_image.get_width()
 SCREEN_HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Jumping Rectangle")
-
-
-
 
 
 # Set up the rectangle
@@ -34,7 +44,7 @@ rect_y = SCREEN_HEIGHT - RECT_HEIGHT
 pygame.init()
 
 ### CODE TO PLAY VIDEO BACKGROUND IN PYGAME WINDOW
-video = cv2.VideoCapture("Linescape1.0.mp4")
+video = cv2.VideoCapture("background2.mp4")
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
 
@@ -68,9 +78,9 @@ while run:
 # pygame.quit()
 
 
-data = pd.read_csv("leaderboard.csv")
+# data = pd.read_csv("leaderboard.csv")
 # data = data.to_json(orient="columns") 
-print(data['Username'][0])
+# print(data['Username'][0])
 # print(data['Username'])
 
 # usernames = data.loc[:,"Username"]

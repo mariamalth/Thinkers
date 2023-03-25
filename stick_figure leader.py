@@ -8,6 +8,7 @@ import mediapipe as mp
 import string
 from csv import writer
 import time
+import pandas as pd
 
 # initialize Pygame
 pygame.init()
@@ -31,6 +32,11 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
+
+# set up the leaderboard
+# to put each row below the other
+offset = 0 
+
 
 #setting up the tutorial
 
@@ -654,7 +660,6 @@ while camera_video.isOpened():
     player.update(movement,l_arm_theta, r_arm_theta)
     obstacles.update()
     if game_started:
-        
         for obstacle in obstacles:
             if player.get_rect().colliderect(obstacle.get_rect()):
                 # the player has collided with an obstacle, so lose a life
@@ -678,7 +683,6 @@ while camera_video.isOpened():
                     break
                 obstacles.empty()
        
-    
         # add obstacles
         current_time = pygame.time.get_ticks()
         if current_time - last_spawn_time > spawn_time:
@@ -711,17 +715,49 @@ while camera_video.isOpened():
     screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
     screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
     player.draw()
-    
-    if player.lives == 0:
-         times = 1200
-         while times >0:
-            screen.blit(font2.render("game over.. restarting", True, GREEN), (WIDTH//4, HEIGHT//2))
-            obstacles.empty()
-            passed_time = clock.tick(120)
-            times -= passed_time
-            if times == 0:
-                player.lives+=3
-                score = 0
+
+    if player.lives == 0: 
+        success, video_image = video.read()
+        if success: 
+            video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+        window.blit(video_surf, (0, 0))
+        #player lost, show leaderboard
+        game_over = font.render("game over.. join hands to restart", True, GREEN)
+        screen.blit(game_over, (WIDTH / 2 - game_over.get_rect().width / 2, HEIGHT / 4))
+        #here give restart option
+        
+        #get csv file 
+        data = pd.read_csv("leaderboard.csv")
+        #order dataset based on highest scores
+        data = data.sort_values(by=['Score'], ascending=False)
+        # get the top 10 scores 
+        data = pd.read_csv("leaderboard.csv").head(10)
+        usernames = data.loc[:,"Username"]
+        #offset so the rows show one after the other
+        offset=0
+        for row in usernames:
+            score = data.loc[data['Username'] == row]['Score'].values[0]
+            leader_row = font.render(f"{row.lower()}.................{str(score)}", True, WHITE)
+            screen.blit(leader_row, (WIDTH / 2 - leader_row.get_rect().width / 2, (HEIGHT / 3)+offset))
+            offset+=30
+            
+        #TO DO: CHECK IF HANDS JOINED WITHIN 60 SECONDS, IF YES, GO TO GAME STARTED AND MAKE TUTORIAL COMPLETED
+            # IF THEY DONT JOIN HANDS, TUTORIAL COMPLETED = FALSE
+        #  times = 1200
+        #  while times >0:
+        #     screen.blit(font2.render("game over.. join hands to restart", True, GREEN), (WIDTH//4, HEIGHT//2))
+        #     if checkHandsJoined(frame,results) == "Hands Joined":
+        #         obstacles.empty()
+        #         #restart
+        #     passed_time = clock.tick(120)
+        #     times -= passed_time
+        #     if times == 0:
+        #         player.lives+=3
+        #         score = 0
+        
+        #save the leaderboard to the updated csv so there will always be only 10 rows stored
+        csv_save = data
+        csv_save.to_csv("leaderboard.csv", index=False)
     pygame.display.update()
         
         # control the frame rate
