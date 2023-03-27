@@ -33,15 +33,30 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-# set up the leaderboard
+# setting up the leaderboard
 # to put each row below the other
 offset = 0 
+data = pd.read_csv("leaderboard.csv")
+
+# setting up the restart countdown 
+#countdown to restart
+countdown, countdown_seconds = 15, '15'
+pygame.time.set_timer(pygame.USEREVENT, 1500)
+reset = False
+
 
 
 #setting up the tutorial
 
-# Initialize a variable to store the state of the tutorial (completed or not).
+# Initialize variables to store the state of the tutorial.
+#TO DO make it so at the end of each game, if the player chooses not to restart, reset all these variables
 tutorial_completed = False 
+tutorial_hands_joined = False
+tutorial_point = "not started"
+
+positions_moved = []
+
+obstacles_avoided = 0
 
 ### SETTING UP THE MOTION DETECTION
 
@@ -534,29 +549,25 @@ while camera_video.isOpened():
     
     # Check if the pose landmarks in the frame are detected.
     if results.pose_landmarks:
-        l_arm_theta, r_arm_theta = getHandsAngle(frame, results)
-        # Check if the game has started
-        if game_started:    
-            # Get horizontal position of the person in the frame.
-            horizontal_position = checkLeftRight(frame, results)
+        l_arm_theta, r_arm_theta = getHandsAngle(frame, results)   
+        # Get horizontal position of the person in the frame.
+        horizontal_position = checkLeftRight(frame, results)
             
-            # Check if the person has moved to left from center or to center from right.
-            if (horizontal_position=='Left' and x_pos_index!=0) or (horizontal_position=='Center' and x_pos_index==2):
+        # Check if the person has moved to left from center or to center from right.
+        if (horizontal_position=='Left' and x_pos_index!=0) or (horizontal_position=='Center' and x_pos_index==2):    
+            # Press the left arrow key.
+            movement = "right"
                 
-                # Press the left arrow key.
-                movement = "right"
-                
-                # Update the horizontal position index of the character.
-                x_pos_index -= 1               
+            # Update the horizontal position index of the character.
+            x_pos_index -= 1               
  
             # Check if the person has moved to Right from center or to center from left.
-            elif (horizontal_position=='Right' and x_pos_index!=2) or (horizontal_position=='Center' and x_pos_index==0):
+        elif (horizontal_position=='Right' and x_pos_index!=2) or (horizontal_position=='Center' and x_pos_index==0):
+            # Press the right arrow key.
+            movement = "left"
                 
-                # Press the right arrow key.
-                movement = "left"
-                
-                # Update the horizontal position index of the character.
-                x_pos_index += 1
+            # Update the horizontal position index of the character.
+            x_pos_index += 1
             
             #--------------------------------------------------------------------------------------------------------------
             
@@ -567,7 +578,13 @@ while camera_video.isOpened():
         
         # Check if the left and right hands are joined & the tutorial is completed.
         if checkHandsJoined(frame, results) == 'Hands Joined':
- 
+
+            #if hands joined for the first time or after reset, set tutorial hands completed to actually start tutorial and move from welcome screen
+            if tutorial_hands_joined == False: #or reset == True:
+                tutorial_hands_joined = True
+                #change tutorial point to first point, the motion detection highlight
+                tutorial_point = "motion detection highlight"
+    
             # Increment the count of consecutive frames with +ve condition.
             counter += 1
  
@@ -654,12 +671,119 @@ while camera_video.isOpened():
         #     # Get the mouse position
         #     mouse_x, mouse_y = pygame.mouse.get_pos()
         #     print("Clicked at ({}, {})".format(mouse_x, mouse_y))
-        pass
+        
+        # countdown for restarting
+        if player.lives == 0:
+            if event.type == pygame.USEREVENT: 
+                countdown -= 1
+                if countdown > 0:
+                    countdown_seconds = str(countdown)
 
     # update the sprites
     player.update(movement,l_arm_theta, r_arm_theta)
     obstacles.update()
-    if game_started:
+
+    #video will be constantly playing, tutorial or not.
+    success, video_image = video.read()
+    if success: 
+        video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+    window.blit(video_surf, (0, 0))
+    
+    #Display the welcome screen
+
+    #players' first time playing, has not joined hands yet
+    if tutorial_hands_joined == False:
+        #for experience resetting
+        # tutorial_point = "not started"
+        if reset == True:
+            # only reset once so change reset back to false
+            reset = False
+            obstacles.empty()
+            success, video_image = video.read()
+            if success: 
+                video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+                window.blit(video_surf, (0, 0))
+        welcome = font.render("welcome...", True, WHITE)
+        text = font.render("join your hands to start", True, WHITE)
+        screen.blit(welcome, (WIDTH / 2 - welcome.get_rect().width / 2, HEIGHT / 4))
+        screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 2))
+        player.draw()
+    
+    # All the different points and screens of the tutorial, past welcome screen
+    if tutorial_completed == False:
+            if reset == True:
+                print(tutorial_point)
+            if tutorial_point=="motion detection highlight":
+                #encourage user to move left and right and move arms around
+                tutorial_text = font.render("highlight this experience is based on motion detection ", True, WHITE)
+                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+                
+                #check that they moved around screen
+                if player.current_position not in positions_moved:
+                    positions_moved.append(player.current_position)
+                
+                #once done, change tutorial point 
+                if len(positions_moved) ==3:
+                    tutorial_point = "obstacles highlight"
+                
+            if tutorial_point == "obstacles highlight":
+                tutorial_text = font.render("showing obstacles coming towards them", True, GREEN)
+                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+                for obstacle in obstacles:
+                    if player.get_rect().colliderect(obstacle.get_rect()):
+                        # the player has collided with an obstacle, so notify them 
+                        obstacles.empty()
+                        # notify_text = font.render("let's try that again!", True, WHITE)
+                        # screen.blit(notify_text, (WIDTH / 2 - notify_text.get_rect().width / 2, HEIGHT / 2))
+                        # times1 = 1200
+                        # while times1 >0:
+                        #     obstacles.empty()
+                        #     #only shows for a second
+                        #     screen.blit(notify_text, (WIDTH / 2 - notify_text.get_rect().width / 2, HEIGHT / 3))
+                        #     passed_time = clock.tick(120)
+                        #     times1 -= passed_time
+                    
+                    ## TO DO: if successfully avoided 3 obstacles, move to next tutorial point - need to work on altering HEIGHT
+                    if obstacle.y > HEIGHT-30:
+                        if not player.get_rect().colliderect(obstacle.get_rect()):
+                            # print(obstacles_avoided)
+                            obstacles_avoided+=1
+                    
+                    if obstacles_avoided == 3:
+                        #TO DO: CHANGE - THIS IS JUST FOR FIXING RESTART
+                        tutorial_completed = True
+                        game_started = True
+
+                        
+                # add obstacles
+                current_time = pygame.time.get_ticks() 
+                # multiply last spawn time by 1.5 to slow the obstacles down for the tutorial
+                if current_time - last_spawn_time*1.5 > spawn_time:
+                    last_spawn_time = current_time
+                    position = random.choice(["center","left","right"])
+                    style = "stand"
+                    obstacle = Obstacle(position,style)
+                    obstacles.add(obstacle)
+                
+                # remove obstacles that have gone off the bottom of the screen
+                for obstacle in obstacles:
+                    if obstacle.y > HEIGHT:
+                        obstacles.remove(obstacle)
+
+            for obstacle in obstacles:
+                pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
+
+            if tutorial_point == "movement for obstacles highlight":
+                print(0)
+            if tutorial_point == "different obstacle types highilght":
+                print("tutorial completed, go to start screen")
+          
+    player.draw()
+
+    if game_started & tutorial_completed:
+        screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
+        screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
+        player.draw()
         for obstacle in obstacles:
             if player.get_rect().colliderect(obstacle.get_rect()):
                 # the player has collided with an obstacle, so lose a life
@@ -668,9 +792,8 @@ while camera_video.isOpened():
                 if player.lives == 0:
                     # player has no lives left
                     # Create randomly generated username for player
-
                     # generating random strings
-                    if username ==None:
+                    if username == None:
                         username = ''.join(random.choices(string.ascii_uppercase, k=5))
                         user_score = [username,int(score)]
                         #!! in the end, this needs to be modified for the leaderboard to store the top 10
@@ -679,6 +802,8 @@ while camera_video.isOpened():
                             csv_writer = writer(write_obj)
                             # Add contents of list as last row in the csv file
                             csv_writer.writerow(user_score)
+                        # Add the new row to the dataframe
+                        data.loc[len(data)] = user_score
                     #end the game
                     break
                 obstacles.empty()
@@ -700,64 +825,69 @@ while camera_video.isOpened():
                 score += 5
                 
         score += 0.1
-    #play video
-    success, video_image = video.read()
-    if success: 
-            video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
-
-    window.blit(video_surf, (0, 0))
-
+        
     for obstacle in obstacles:
         pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
-    if not game_started:
+   
+     #join hands for the game to start after tutorial is completed
+    if tutorial_completed and not game_started:
         text = font.render("join your hands to start", True, WHITE)
         screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 4))
-    screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
-    screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
-    player.draw()
+        if checkHandsJoined(frame,results) == "Hands Joined":
+            screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
+            screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
+        player.draw()
 
     if player.lives == 0: 
-        success, video_image = video.read()
-        if success: 
-            video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
-        window.blit(video_surf, (0, 0))
-        #player lost, show leaderboard
-        game_over = font.render("game over.. join hands to restart", True, GREEN)
-        screen.blit(game_over, (WIDTH / 2 - game_over.get_rect().width / 2, HEIGHT / 4))
-        #here give restart option
-        
-        #get csv file 
-        data = pd.read_csv("leaderboard.csv")
-        #order dataset based on highest scores
-        data = data.sort_values(by=['Score'], ascending=False)
-        # get the top 10 scores 
-        data = pd.read_csv("leaderboard.csv").head(10)
-        usernames = data.loc[:,"Username"]
-        #offset so the rows show one after the other
-        offset=0
-        for row in usernames:
-            score = data.loc[data['Username'] == row]['Score'].values[0]
-            leader_row = font.render(f"{row.lower()}.................{str(score)}", True, WHITE)
-            screen.blit(leader_row, (WIDTH / 2 - leader_row.get_rect().width / 2, (HEIGHT / 3)+offset))
-            offset+=30
-            
-        #TO DO: CHECK IF HANDS JOINED WITHIN 60 SECONDS, IF YES, GO TO GAME STARTED AND MAKE TUTORIAL COMPLETED
+        obstacles.empty()
+        # success, video_image = video.read()
+        # if success: 
+            # video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+        # window.blit(video_surf, (0, 0))
+         #TO DO: CHECK IF HANDS JOINED WITHIN 60 SECONDS, IF YES, GO TO GAME STARTED AND MAKE TUTORIAL COMPLETED
             # IF THEY DONT JOIN HANDS, TUTORIAL COMPLETED = FALSE
-        #  times = 1200
-        #  while times >0:
-        #     screen.blit(font2.render("game over.. join hands to restart", True, GREEN), (WIDTH//4, HEIGHT//2))
-        #     if checkHandsJoined(frame,results) == "Hands Joined":
-        #         obstacles.empty()
-        #         #restart
-        #     passed_time = clock.tick(120)
-        #     times -= passed_time
-        #     if times == 0:
-        #         player.lives+=3
-        #         score = 0
         
+        #player lost, show leaderboard
+        #restart option
+        if countdown > 0:
+            game_over = font.render(f"game over.. join hands in {countdown_seconds} seconds to restart", True, GREEN)
+            screen.blit(game_over, (WIDTH / 2 - game_over.get_rect().width / 2, HEIGHT / 4))
+                 #order dataset based on highest scores
+            data = data.sort_values(by=['Score'], ascending=False)
+            # get the top 10 scores 
+            data = data.head(10)
+            usernames = data.loc[:,"Username"]
+            #offset so the rows show one after the other
+            offset=0
+            for row in usernames:
+                score = data.loc[data['Username'] == row]['Score'].values[0]
+                #Highlight the users score if they make it on the leaderboard
+                if row == username:
+                    user_row = font.render(f"{row.lower()}.................{str(score)}", True, GREEN)
+                    screen.blit(user_row, (WIDTH / 2 - user_row.get_rect().width / 2, (HEIGHT / 3)+offset))
+                else:
+                    leader_row = font.render(f"{row.lower()}.................{str(score)}", True, WHITE)
+                    screen.blit(leader_row, (WIDTH / 2 - leader_row.get_rect().width / 2, (HEIGHT / 3)+offset))
+                offset+=30
+            
+            #Restart game
+            if checkHandsJoined(frame,results) == "Hands Joined":
+                player.lives+=3
+                score = 0
+        #Player has not restarted, reset experience
+        elif tutorial_completed: 
+            player.lives =3
+            tutorial_completed = False 
+            tutorial_hands_joined = False
+            tutorial_point = "not started"
+            game_started = False
+            reset = True
+            positions_moved = []
+            obstacles_avoided = 0
         #save the leaderboard to the updated csv so there will always be only 10 rows stored
         csv_save = data
-        csv_save.to_csv("leaderboard.csv", index=False)
+        csv_save.to_csv("leaderboard.csv", index=False)       
+
     pygame.display.update()
         
         # control the frame rate

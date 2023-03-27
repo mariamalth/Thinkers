@@ -69,7 +69,7 @@ def detectPose(image, pose):
     # Perform the Pose Detection.
     results = pose.process(imageRGB)
     # Check if any landmarks are detected and are specified to be drawn.
-    print(results)
+    # print(results)
     return results
     
 

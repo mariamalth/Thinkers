@@ -23,6 +23,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
+RED = (255,0,0)
 
 # Initialize Mediapipe Pose Detection
 mp_pose = mp.solutions.pose
@@ -73,7 +74,7 @@ class Player():
             landmarks = np.array([(landmark.x, landmark.y, landmark.z) for landmark in landmarks.landmark])
             landmarks = landmarks[:, :2]
             
-            factor = 0.3
+            factor = 0.5
             center_x = screen.get_width() / 2
             center_y = screen.get_height() * (1.2-factor)
     
@@ -111,20 +112,20 @@ class Obstacle(pygame.sprite.Sprite):
         super().__init__()
         self.style = style
         self.position = position
-        self.colision_line = self.get_colision_line()
+        self.collision_line = self.get_collision_line()
         self.color = self.get_color()
         self.height = self.get_height()
         self.width = self.get_width()
         self.y = self.get_position_y()
         self.x = self.get_position_x()
         
-    def get_colision_line(self):
+    def get_collision_line(self):
         if self.style == "crouch":
-            return HEIGHT - 50
+            return 500
         elif self.style == "jump":
-            return HEIGHT - 250
+            return HEIGHT // 2 +100
         else: 
-            return HEIGHT - 150
+            return HEIGHT- 140
     
     def get_color(self):
         if self.style == "stand":
@@ -215,14 +216,19 @@ while True:
             
         # Draw landmarks as circles on Pygame window
         if player.landmarks:
-            for landmark in player.landmarks:
-                pygame.draw.circle(screen, (255, 0, 0), landmark, 5)
+            iter_landmarks = iter(player.landmarks)
+            for i in range(len(player.landmarks)-1):
+                landmark = player.landmarks[i]
+                next_landmark = player.landmarks[i+1]
+                # pygame.draw.line(screen, GREEN, landmark,next_landmark, 10)
+                pygame.draw.circle(screen, RED, landmark, 5)
+                # pygame.draw.circle(screen, RED, next_landmark, 5)
                 
     if game_started:
         for obstacle in obstacles: # this loop is used to store the obstacle in a variable
             pass
-        # seting up the colison zone
-        y1 = y2 = obstacle.colision_line  
+        # seting up the collison zone
+        y1 = y2 = obstacle.collision_line  
         y3 = y4 = y1 + 30
         d1 = (y1 - HEIGHT + Obstacle.distance) + (Obstacle.side - Obstacle.distance)
         d2 = (y3 - HEIGHT + Obstacle.distance) + (Obstacle.side - Obstacle.distance)
@@ -235,7 +241,7 @@ while True:
         x3 = WIDTH / 2 - w2 / 2 
         x4 = WIDTH / 2 + w2 / 2 
         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
-        # colision handling
+        # collision handling
         if player.landmarks:
             if obstacle.y > y1 and obstacle.y < y3:
                 for x, y in player.landmarks:
