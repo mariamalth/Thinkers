@@ -239,8 +239,43 @@ while True:
             
         # Draw landmarks as circles on Pygame window
         if player.landmarks:
-            for landmark in player.landmarks:
-                pygame.draw.circle(screen, (255, 0, 0), landmark, 5)
+            x1, y1 = player.landmarks[0]
+            x2, y2 = player.landmarks[8]
+            r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
+            color = (255, 0, 0)
+            line_width = 15
+            
+            pygame.draw.polygon(screen, color, [player.landmarks[11],player.landmarks[12],player.landmarks[24],player.landmarks[23]])
+            pygame.draw.circle(screen, color, player.landmarks[0], r * 1.3, width=0)
+            pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[14], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[14], player.landmarks[16], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[22], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[18], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[20], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[18], player.landmarks[20], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[24], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[24], player.landmarks[26], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[26], player.landmarks[28], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[30], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[32], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[30], player.landmarks[32], width=line_width)
+            
+            pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[13], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[13], player.landmarks[15], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[21], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[17], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[19], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[17], player.landmarks[19], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[23], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[23], player.landmarks[25], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[25], player.landmarks[27], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[29], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[31], width=line_width)
+            pygame.draw.line(screen, color, player.landmarks[29], player.landmarks[31], width=line_width)
+
+
+          
+
                 
     if game_started:
         if len(obstacles) == 0:
