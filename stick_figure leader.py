@@ -23,6 +23,8 @@ success, video_image = video.read()
 video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
 fps = video.get(cv2.CAP_PROP_FPS)
+# for video loop 
+frame_counter = 0 
 
 window = pygame.display.set_mode(video_image.shape[1::-1])
 pygame.display.set_caption("Endless Runner")
@@ -522,9 +524,8 @@ num_of_frames = 10
 clock = pygame.time.Clock()
 
     
-
-# while player.lives > 0 and camera_video.isOpened():
 while camera_video.isOpened():
+    frame_counter += 1
     print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     movement = None
     
@@ -689,7 +690,12 @@ while camera_video.isOpened():
     if success: 
         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
     window.blit(video_surf, (0, 0))
-    
+
+    #video loop 
+    if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
+        frame_counter = 0
+        video = cv2.VideoCapture("background2.mp4")
+
     #Display the welcome screen
 
     #players' first time playing, has not joined hands yet
