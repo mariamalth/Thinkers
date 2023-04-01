@@ -266,7 +266,7 @@ class Obstacle(pygame.sprite.Sprite):
     def update(self):
         # start_point = HEIGHT - Obstacle.distance - self.height
         # move the obstacle down the screen
-        self.y += Obstacle.speed + self.height / 10
+        self.y += Obstacle.speed + self.height / 5
         d = (self.y - self.start_point) + (Obstacle.side - Obstacle.distance)
         rate = (size(Obstacle.side,Obstacle.b_line,d)) / (Obstacle.s_line)
         self.height = self.get_height() * rate
@@ -719,6 +719,13 @@ while True:
                     
             score += 0.1
             
+            if score == 10:
+                Obstacle.speed *= 1.5
+            if score == 20:
+                Obstacle.speed *= 1.5
+            if score == 30:
+                Obstacle.speed *= 1.5
+                
         # drawing the collision zone
             pygame.draw.polygon(screen, BLUE, vertices)
             
@@ -807,4 +814,3 @@ while True:
     # Display frame in Pygame window
     pygame.display.update()
     clock.tick(160)
-
