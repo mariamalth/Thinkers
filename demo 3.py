@@ -7,6 +7,7 @@ import math
 import string
 from csv import writer
 import pandas as pd
+import ptext
 
 # Initialize Pygame window
 pygame.init()
@@ -24,6 +25,11 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255,0,0)
+
+#set up the fonts 
+font = pygame.font.Font('Dream MMA.ttf',22)
+font2 = pygame.font.Font('Dream MMA.ttf',32)
+font_name = 'Dream MMA.ttf'
 
 # setting up the leaderboard
 # to put each row below the other
@@ -280,8 +286,6 @@ clock = pygame.time.Clock()
 # set up the score and the username
 username = None
 score = 0
-font = pygame.font.Font('Dream MMA.ttf',22)
-font2 = pygame.font.Font('Dream MMA.ttf',32)
 obstacle_counter = 0
 
 game_started = False
@@ -325,7 +329,7 @@ while True:
             x1, y1 = player.landmarks[0]
             x2, y2 = player.landmarks[8]
             r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-            color = (255, 0, 0)
+            color = (0, 0, 0)
             line_width = 15
             # Get horizontal position of the person in the frame.
             horizontal_position = checkLeftRight(landmarks)
@@ -392,10 +396,12 @@ while True:
         #     # only reset once so change reset back to false
         #     reset = False
         #     obstacles.empty()
-        welcome = font.render("welcome...", True, WHITE)
-        text = font.render("join your hands to start", True, WHITE)
-        screen.blit(welcome, (WIDTH / 2 - welcome.get_rect().width / 2, HEIGHT / 4))
-        screen.blit(text, (WIDTH / 2 - text.get_rect().width / 2, HEIGHT / 2))
+        welcome = "welcome..."
+        welcome_rect = font2.render(f"{welcome}", True, WHITE)
+        join = "join your hands to start"
+        join_rect = font2.render(f"{join}", True, WHITE)
+        ptext.draw(welcome, (WIDTH / 2 - welcome_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
+        ptext.draw(join, (WIDTH / 2 - join_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
 
         if landmarks:
             # game_started = checkHandsJoined(landmarks)
@@ -404,8 +410,9 @@ while True:
     if tutorial_completed == False:
             if tutorial_point=="motion detection highlight":
                 #encourage user to move left and right and move arms around
-                tutorial_text = font.render("this experience is based on motion detection, try moving around!", True, WHITE)
-                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+                tutorial = "this experience is based on motion detection, try moving around!"
+                tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                 
                 #check that they moved around
                 if player.landmarks:
@@ -418,8 +425,10 @@ while True:
                     # tutorial_completed = True
             if tutorial_point == "obstacles highlight":
                  #show users standing obstacles and concept of game
-                tutorial_text = font.render("you will have to avoid different incoming obstacles, get ready!", True, WHITE)
-                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))
+                tutorial = "you will have to avoid different incoming obstacles, get ready!"
+                tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
                     style = "stand"
@@ -481,8 +490,10 @@ while True:
                     pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
             
             if tutorial_point == "crouch obstacle highlight": 
-                tutorial_text = font.render("to avoid this type of obstacle, squat below the line", True, WHITE)
-                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))  
+                tutorial = "to avoid this type of obstacle, squat below the line"
+                tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
 
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
@@ -511,8 +522,10 @@ while True:
 
                 # notify player when to do exercise/when obstacle is coming up
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
-                        notif_text = font.render("squat now!", True, RED)
-                        screen.blit(notif_text, (WIDTH / 2 - notif_text.get_rect().width / 2, HEIGHT / 2))
+                        notif = "squat now!"
+                        notif_rect = font.render(f"{notif}", True, RED)
+                        ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 # colision handling
                 if player.landmarks:
                     if obstacle.y > y1 and obstacle.y < y3:  
@@ -552,8 +565,10 @@ while True:
                     pygame.draw.rect(screen, obstacle.color, [obstacle.x, obstacle.y, obstacle.width, obstacle.height])
 
             if tutorial_point == "jump obstacle highlight": 
-                tutorial_text = font.render("to avoid this type of obstacle, do a jumping jack high above the line", True, WHITE)
-                screen.blit(tutorial_text, (WIDTH / 2 - tutorial_text.get_rect().width / 2, HEIGHT / 4))  
+                tutorial = "to avoid this type of obstacle, do a jumping jack high above the line"
+                tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
                     # TO DO: SWITCH JUMP AND CROUCH STYLE NAMES -> what is "jump" is actually the crouch one
@@ -581,8 +596,10 @@ while True:
 
                 # notify player when to do exercise/when obstacle is coming up
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
-                        notif_text = font.render("jump now!", True, RED)
-                        screen.blit(notif_text, (WIDTH / 2 - notif_text.get_rect().width / 2, HEIGHT / 2))
+                    notif = "jump now!"
+                    notif_rect = font.render(f"{notif}", True, RED)
+                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 # colision handling
                 if player.landmarks:
                     if obstacle.y > y1 and obstacle.y < y3:  
@@ -629,8 +646,11 @@ while True:
      #(game not started)join hands for the game to start after tutorial is completed
     if tutorial_completed == True:
         if game_started == False:
-            game_join = font.render("join your hands to start", True, GREEN)
-            screen.blit(game_join, (WIDTH / 2 - game_join.get_rect().width / 2, HEIGHT / 4))
+            game_join = "join your hands to start"
+            game_rect = font.render(f"{game_join}", True, GREEN)
+            ptext.draw(game_join, (WIDTH / 2 - game_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+
             if results.pose_landmarks:
                 if checkHandsJoined(landmarks):
                     game_started = True
@@ -711,9 +731,12 @@ while True:
         obstacles.empty()
         #restart option - 15 seconds 
         if countdown > 0:
-            game_over = font.render(f"game over.. join hands in {countdown_seconds} seconds to restart", True, GREEN)
-            screen.blit(game_over, (WIDTH / 2 - game_over.get_rect().width / 2, HEIGHT / 4))
-                 #order dataset based on highest scores
+            game_over = f"game over.. join hands in {countdown_seconds} seconds to restart"
+            game_over_rect = font.render(f"{game_over}", True, GREEN)
+            ptext.draw(game_over, (WIDTH / 2 - game_over_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+            
+            #order dataset based on highest scores
             data = data.sort_values(by=['Score'], ascending=False)
             # get the top 10 scores 
             data = data.head(10)
@@ -724,11 +747,16 @@ while True:
                 score = data.loc[data['Username'] == row]['Score'].values[0]
                 #Highlight the users score if they make it on the leaderboard
                 if row == username:
-                    user_row = font.render(f"{row.lower()}.................{str(score)}", True, GREEN)
-                    screen.blit(user_row, (WIDTH / 2 - user_row.get_rect().width / 2, (HEIGHT / 3)+offset))
+                    user_row = f"{row.lower()}.................{str(score)}"
+                    user_row_rect = font.render(f"{user_row}", True, GREEN)
+                    ptext.draw(user_row, (WIDTH / 2 - user_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+
                 else:
-                    leader_row = font.render(f"{row.lower()}.................{str(score)}", True, WHITE)
-                    screen.blit(leader_row, (WIDTH / 2 - leader_row.get_rect().width / 2, (HEIGHT / 3)+offset))
+                    leader_row = f"{row.lower()}.................{str(score)}"
+                    leader_row_rect = font.render(f"{leader_row}", True, WHITE)
+                    ptext.draw(leader_row, (WIDTH / 2 - leader_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 offset+=30
             #save the leaderboard to the updated csv so there will always be only 10 rows stored
             csv_save = data

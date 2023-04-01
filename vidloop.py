@@ -80,8 +80,8 @@ while True:
         video = cv2.VideoCapture("background2.mp4")
     
     text = "hello world"
-    text_rect = font.render(f"{text}", True,WHITE)
-    ptext.draw(text, (WIDTH / 2 - text_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
+    text_rect = font.render("hello world", True,WHITE)
+    ptext.draw(text, (WIDTH / 2 - text_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.5,2.0))
     # screen.fill(BG_COLOR)
     # Blit the current image.
     # screen.blit(image, (0,0))
