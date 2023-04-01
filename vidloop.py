@@ -1,5 +1,6 @@
 import pygame as pg
 import cv2
+import ptext
 
 #LOOP WORKS
 pg.init()
@@ -9,11 +10,20 @@ HEIGHT = background_image.get_height()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 BG_COLOR = pg.Color('gray12')
-video = cv2.VideoCapture("background2 copy.mp4")
+video = cv2.VideoCapture("background2.mp4")
 success, video_image = video.read()
 video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = video.get(cv2.CAP_PROP_FPS)
 duration = video_length/fps
+
+font = pg.font.Font('Dream MMA.ttf',22)
+font_name = 'Dream MMA.ttf'
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+
 
 
 frame_counter = 0 
@@ -67,10 +77,11 @@ while True:
     window.blit(video_surf, (0, 0))
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
         frame_counter = 0
-        video = cv2.VideoCapture("background2 copy.mp4")
-
-    print(video.read())
+        video = cv2.VideoCapture("background2.mp4")
     
+    text = "hello world"
+    text_rect = font.render(f"{text}", True,WHITE)
+    ptext.draw(text, (WIDTH / 2 - text_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
     # screen.fill(BG_COLOR)
     # Blit the current image.
     # screen.blit(image, (0,0))

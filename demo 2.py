@@ -14,7 +14,6 @@ import string
 import random
 from csv import writer
 import numpy as np
-from pyvidplayer import Video
 # from protobuf_to_dict import protobuf_to_dict #one potential way to extract landmarks into dictionary
  
 

@@ -20,7 +20,7 @@ HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 video = cv2.VideoCapture("background2.mp4")
 success, video_image = video.read()
-video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+# video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
 fps = video.get(cv2.CAP_PROP_FPS)
 # for video loop 
@@ -51,7 +51,6 @@ reset = False
 #setting up the tutorial
 
 # Initialize variables to store the state of the tutorial.
-#TO DO make it so at the end of each game, if the player chooses not to restart, reset all these variables
 tutorial_completed = False 
 tutorial_hands_joined = False
 tutorial_point = "not started"
@@ -61,8 +60,11 @@ positions_moved = []
 obstacles_avoided = 0
 
 ### SETTING UP THE MOTION DETECTION
-
+# Initialize Mediapipe Pose Detection
 mp_pose = mp.solutions.pose
+
+# Start video capture
+cap = cv2.VideoCapture(0)
  
 # Setup the Pose function for images.
 pose_image = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, model_complexity=1)
@@ -162,7 +164,6 @@ def checkJumpCrouch(image, results, MID_Y):
     
 
 def checkLeftRight(image, results):
-
     # Declare a variable to store the horizontal position (left, center, right) of the person.
     horizontal_position = None
     
@@ -424,6 +425,14 @@ class Obstacle(pygame.sprite.Sprite):
         self.width = self.get_width()
         self.y = self.get_position_y()
         self.x = self.get_position_x()
+        
+    def get_colision_line(self,nose_y,ankle_y):
+        if self.style == "crouch":
+            return ankle_y - 20
+        elif self.style == "jump":
+            return nose_y 
+        else: 
+            return (nose_y + ankle_y) / 2
     
     def get_color(self):
         if self.style == "stand":
@@ -477,10 +486,7 @@ class Obstacle(pygame.sprite.Sprite):
 # create the sprites and groups
 player = Player()
 obstacles = pygame.sprite.Group()
-moving_sprites = pygame.sprite.Group()
 
-# Creating the sprites and groups
-moving_sprites.add(player)
 
 # Set up the clock
 clock = pygame.time.Clock()
@@ -492,11 +498,6 @@ username = None
 score = 0
 font = pygame.font.Font('Dream MMA.ttf',22)
 font2 = pygame.font.Font('Dream MMA.ttf',32)
-
-camera_video = cv2.VideoCapture(0)
-camera_video.set(3,1280)
-camera_video.set(4,960)
-
 
  
 # Initialize a variable to store the state of the game (started or not).
@@ -524,7 +525,7 @@ num_of_frames = 10
 clock = pygame.time.Clock()
 
     
-while camera_video.isOpened():
+while True:
     frame_counter += 1
     print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     movement = None
@@ -533,10 +534,11 @@ while camera_video.isOpened():
     r_arm_theta = None
     
     # Read a frame.
-    ok, frame = camera_video.read()
+    ret, frame = cap.read()
+    # frame = cv2.flip(frame, 1)
     
     # Check if frame is not read properly then continue to the next iteration to read the next frame.
-    if not ok:
+    if not ret:
         continue
     
     # # Flip the frame horizontally for natural (selfie-view) visualization.
@@ -809,12 +811,10 @@ while camera_video.isOpened():
                 if player.lives !=0:
                     player.lives -= 1
                 if player.lives == 0:
-                    print(score)
                     # player has no lives left
                     # Create randomly generated username for player
                     # generating random strings
                     username = player.username
-                    print(username)
                     user_score = [username,int(score)]
 
                     with open('leaderboard.csv', 'a+', newline='\n') as write_obj:
@@ -826,7 +826,6 @@ while camera_video.isOpened():
                     data.loc[len(data)] = user_score
                     #end the game
                     break
-                print(2)
                 obstacles.empty()
        
         # add obstacles   
