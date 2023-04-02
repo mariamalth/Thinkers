@@ -1,8 +1,17 @@
 import pygame as pg
 import cv2
 import ptext
+import random
 
 #LOOP WORKS
+
+pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+
+pg.mixer.init()
+
+pg.mixer.music.load('background.mp3')
+
+pg.mixer.music.play(-1)
 pg.init()
 background_image = pg.image.load("linescape_stopmotion/Linescape1.0.0.png")
 WIDTH = background_image.get_width()
@@ -10,7 +19,11 @@ HEIGHT = background_image.get_height()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
 BG_COLOR = pg.Color('gray12')
-video = cv2.VideoCapture("background2.mp4")
+
+
+environments = ["oceanscape.mp4","desertscape.mp4"]
+start_environment = random.choice(environments)
+video = cv2.VideoCapture(start_environment)
 success, video_image = video.read()
 video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = video.get(cv2.CAP_PROP_FPS)
@@ -25,8 +38,6 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-
-
 frame_counter = 0 
 # print(duration)
 
@@ -40,10 +51,10 @@ if success:
     video_surf = pg.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
 window.blit(video_surf, (0, 0))
 
-while i <121:
-    images.append(pg.image.load(f"linescape_stopmotion2/background.0.{i}.png"))
-    videos.append(cv2.VideoCapture("background2.mp4"))
-    i+=1
+# while i <121:
+#     images.append(pg.image.load(f"linescape_stopmotion2/background.0.{i}.png"))
+#     videos.append(cv2.VideoCapture("background2.mp4"))
+#     i+=1
 # Three differently colored surfaces for demonstration purposes.
 # for color in ((0, 100, 200), (200, 100, 50), (100, 200, 0)):
 #     surface = pg.Surface((200, 100))
@@ -72,13 +83,21 @@ while True:
         #     image = images[index]  # Alternatively load the next image here.
 
         #video will be constantly playing, tutorial or not.
+    # start_environment = random.choice(environments)
+    # video = cv2.VideoCapture(start_environment)
     success, video_image = video.read()
     if success: 
         video_surf = pg.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
-    window.blit(video_surf, (0, 0))
+    screen.blit(video_surf, (0, 0))
+    
+    #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
+        start_environment = random.choice(environments)
+        print("??????????????????",start_environment)
+        video = cv2.VideoCapture(start_environment)
+        print(video.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_counter = 0
-        video = cv2.VideoCapture("background2.mp4")
+
     
     text = "hello world"
     text_rect = font.render("hello world", True,WHITE)
