@@ -292,10 +292,10 @@ while True:
     
     #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
-        start_environment = random.choice(environments)
-        print("??????????????????",start_environment)
-        frame_counter = 0
+        # start_environment = random.choice(environments)
         video = cv2.VideoCapture(start_environment)
+        frame_counter = 0
+        # video = cv2.VideoCapture(start_environment)
 
     # Detect pose landmarks
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
