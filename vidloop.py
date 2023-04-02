@@ -16,8 +16,9 @@ video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = video.get(cv2.CAP_PROP_FPS)
 duration = video_length/fps
 
-font = pg.font.Font('Dream MMA.ttf',22)
-font_name = 'Dream MMA.ttf'
+font = pg.font.Font('Pengenalan.ttf',22)
+font2 = pg.font.Font('Pengenalan.ttf',32)
+font_name = 'Pengenalan.ttf'
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)

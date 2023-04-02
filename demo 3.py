@@ -11,7 +11,7 @@ import ptext
 
 # Initialize Pygame window
 pygame.init()
-video = cv2.VideoCapture("background2.mp4")
+video = cv2.VideoCapture("desertscape.mp4")
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
 screen = pygame.display.set_mode(video_image.shape[1::-1])
@@ -26,6 +26,7 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255,0,0)
 
+# BLUE = (13,152,186)
 #set up the fonts 
 font = pygame.font.Font('Dream MMA.ttf',22)
 font2 = pygame.font.Font('Dream MMA.ttf',32)
@@ -155,9 +156,9 @@ class Player():
             landmarks = np.array([(landmark.x, landmark.y, landmark.z) for landmark in landmarks.landmark])
             landmarks = landmarks[:, :2]
             
-            factor = 0.4
+            factor = 0.5
             center_x = screen.get_width() / 2
-            center_y = screen.get_height() * (1.2-factor)
+            center_y = screen.get_height() * (1.5-factor)
     
             # Map landmarks to Pygame coordinates
             x = landmarks[:, 0]
@@ -228,7 +229,7 @@ class Obstacle(pygame.sprite.Sprite):
         if self.style == "stand":
             return BLUE
         elif self.style == "crouch":
-            return BLACK
+            return WHITE
         else:
             return GREEN
     def get_height(self):
@@ -315,7 +316,7 @@ while True:
     #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
         frame_counter = 0
-        video = cv2.VideoCapture("background2.mp4")
+        video = cv2.VideoCapture("desertscape.mp4")
 
     # Detect pose landmarks
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -329,7 +330,7 @@ while True:
             x1, y1 = player.landmarks[0]
             x2, y2 = player.landmarks[8]
             r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-            color = (0, 0, 0)
+            color = WHITE
             line_width = 15
             # Get horizontal position of the person in the frame.
             horizontal_position = checkLeftRight(landmarks)
@@ -353,7 +354,7 @@ while True:
                 if tutorial_hands_joined == False: #or reset == True:
                     tutorial_hands_joined = True
                     #store initial position of random landmark 
-                    random_landmark = player.landmarks[6]
+                    random_landmark = player.landmarks[12]
                     #change tutorial point to first point, the motion detection highlight
                     tutorial_point = "motion detection highlight"
     
@@ -417,7 +418,7 @@ while True:
                 #check that they moved around
                 if player.landmarks:
                     #store state of that random landmark
-                    movement_check = player.landmarks[6]
+                    movement_check = player.landmarks[12]
                 #check that the landmark has moved around enough, hence player moved around
                 if abs(movement_check[0]-random_landmark[0]) >=100 :
                     #move to next point in tutorial

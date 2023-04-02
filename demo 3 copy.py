@@ -10,7 +10,7 @@ from csv import writer
 
 # Initialize Pygame window
 pygame.init()
-video = cv2.VideoCapture("background2.mp4")
+video = cv2.VideoCapture("desertscape.mp4")
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
 screen = pygame.display.set_mode(video_image.shape[1::-1])
