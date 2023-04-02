@@ -382,7 +382,7 @@ while True:
                  #show users standing obstacles and concept of game
                 tutorial = "you will have to avoid different incoming obstacles, get ready!"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
@@ -425,7 +425,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 1:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_point = "crouch obstacle highlight" 
                     obstacles_avoided = 0  
@@ -449,7 +449,7 @@ while True:
             if tutorial_point == "crouch obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, squat below the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
 
                 if len(obstacles) == 0:
@@ -481,7 +481,7 @@ while True:
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
                         notif = "squat now!"
                         notif_rect = font.render(f"{notif}", True, RED)
-                        ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(notif, (WIDTH / 5 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 # colision handling
                 if player.landmarks:
@@ -500,7 +500,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 3:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_point = "jump obstacle highlight"  
                     obstacles_avoided = 0   
@@ -524,7 +524,7 @@ while True:
             if tutorial_point == "jump obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, do a jumping jack high above the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
@@ -555,7 +555,7 @@ while True:
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
                     notif = "jump now!"
                     notif_rect = font.render(f"{notif}", True, RED)
-                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(notif, (WIDTH / 5 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 # colision handling
                 if player.landmarks:
@@ -576,7 +576,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 1:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_completed = True            
                     tutorial_point = "done"
@@ -641,6 +641,17 @@ while True:
             vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
             # colision handling
             if player.landmarks:
+                # notify player when to do exercise/when obstacle is coming up
+                if (y1-obstacle.y)<=110 and obstacle.y <y3:
+                    if obstacle.style == "jump":
+                        notif = "squat now"
+                    elif obstacle.style == "crouch":
+                        notif = "jump now!"
+                    else:
+                        notif = "move now!"
+                    notif_rect = font.render(f"{notif}", True, RED)
+                    ptext.draw(notif, (WIDTH / 6 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 if obstacle.y > y1 and obstacle.y < y3:
                     for x, y in player.landmarks:
                         temp_rect = pygame.Rect(x, y, 1, 1)
@@ -649,11 +660,11 @@ while True:
                                 if player.lives !=0:
                                     # print("hit player, warn next time")
                                     player.lives -= 1
-                                elif player.lives == 0:
+                                if player.lives == 0:
                                     # player has no lives left
                                     # Create randomly generated username for player
                                     # generating random strings
-                                    if username ==None:
+                                    # if username == None:
                                         username = player.username
                                         user_score = [username,int(score)]
                                         #!! in the end, this needs to be modified for the leaderboard to store the top 10
@@ -704,6 +715,9 @@ while True:
             data = data.sort_values(by=['Score'], ascending=False)
             # get the top 10 scores 
             data = data.head(10)
+            #save the leaderboard to the updated csv so there will always be only 10 rows stored
+            csv_save = data
+            csv_save.to_csv("leaderboard.csv", index=False) 
             usernames = data.loc[:,"Username"]
             #offset so the rows show one after the other
             offset=0
@@ -721,16 +735,13 @@ while True:
                     leader_row_rect = font.render(f"{leader_row}", True, WHITE)
                     ptext.draw(leader_row, (WIDTH / 2 - leader_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
-                offset+=30
-            #save the leaderboard to the updated csv so there will always be only 10 rows stored
-            csv_save = data
-            csv_save.to_csv("leaderboard.csv", index=False)       
+                offset+=30      
 
             #Player chooses to restart experience
             if player.landmarks:
                 if checkHandsJoined(landmarks):
                     start_environment = random.choice(environments)
-                    print("!!!!!!!!!!!!!!!!!!!",start_environment)
+                    # print("!!!!!!!!!!!!!!!!!!!",start_environment)
                     player.lives+=3
                     score = 0
                     
@@ -740,7 +751,7 @@ while True:
         #Player has not restarted, reset experience
         if countdown == 0:
             start_environment = random.choice(environments)
-            print("!!!!!!!!!!!!!!!!!!!",start_environment)
+            # print("!!!!!!!!!!!!!!!!!!!",start_environment)
             #reset the players attributes
             player.username =  ''.join(random.choices(string.ascii_uppercase, k=5))
             player.lives +=3
