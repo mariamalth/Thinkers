@@ -741,7 +741,14 @@ while True:
             if player.landmarks:
                 if checkHandsJoined(landmarks):
                     start_environment = random.choice(environments)
-                    # print("!!!!!!!!!!!!!!!!!!!",start_environment)
+                    
+                    #re-capture video and reset frame counter
+                    video = cv2.VideoCapture(start_environment)                    
+                    success, video_image = video.read()
+                    if success: 
+                        video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+                    screen.blit(video_surf, (0, 0))
+                    frame_counter = 0
                     player.lives+=3
                     score = 0
                     
@@ -751,7 +758,12 @@ while True:
         #Player has not restarted, reset experience
         if countdown == 0:
             start_environment = random.choice(environments)
-            # print("!!!!!!!!!!!!!!!!!!!",start_environment)
+            #re-capture video and reset frame counter
+            video = cv2.VideoCapture(start_environment)                    
+            success, video_image = video.read()
+            if success: 
+                video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+            screen.blit(video_surf, (0, 0))
             #reset the players attributes
             player.username =  ''.join(random.choices(string.ascii_uppercase, k=5))
             player.lives +=3
