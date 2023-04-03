@@ -19,7 +19,6 @@ WIDTH = screen.get_width()
 HEIGHT = screen.get_height()
 pygame.display.set_caption("Endless Runner")
 
-print(130 / HEIGHT)
 
 # set up the colors
 WHITE = (255, 255, 255)
@@ -278,7 +277,7 @@ ankle_y = 0
 # Main loop
 while True:
     frame_counter+=1
-    print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
+    # print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     # Read frame from camera
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
@@ -406,6 +405,8 @@ while True:
                         pass
                     x1,y1,x2,y2,x4,y4,x3,y3 = obstacle.get_colision_zone(nose_y,ankle_y)
                     vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                # drawing the collision zone
+                pygame.draw.polygon(screen, BLUE, vertices)
                 # notify player when to do exercise/when obstacle is coming up
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
                             if style == "crouch":
@@ -417,23 +418,28 @@ while True:
                             notif_rect = font.render(f"{notif}", True, RED)
                             ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                         
-            # colision handling
-            hit_obstacle = False
-            if player.landmarks:
-                if obstacle.y > y1 and obstacle.y < y3:
-                    for x, y in player.landmarks:
-                        temp_rect = pygame.Rect(x, y, 1, 1)
-                        if temp_rect.colliderect(obstacle.get_rect()):
-                                hit_obstacle = True
-                                obstacles.empty()
-                                break
-                    if hit_obstacle == False:
-                            obstacles_avoided+=1
-                    else:
-                        #reset variable for next obstacle
-                        hit_obstacle = False  
+                # colision handling
+                hit_obstacle = False
+                if player.landmarks:
+                    for obstacle in obstacles:
+                        pass
+                    if obstacle.y > y1 and obstacle.y < y3:
+                        for x, y in player.landmarks:
+                            temp_rect = pygame.Rect(x, y, 1, 1)
+                            if temp_rect.colliderect(obstacle.get_rect()):
+                                    hit_obstacle = True
+                                    obstacles.empty()
+                                    break
+                        if hit_obstacle == False:
+                                print("avoided"+ obstacle.style)
+                                obstacles_avoided+=1
+                        else:
+                            #reset variable for next obstacle
+                            hit_obstacle = False  
+                        print(str(hit_obstacle) + " " + style)
             #TO DO:play around with number
             if obstacles_avoided == 1:
+                obstacles_avoided = 0 
                 obstacles.empty()
                 if style == "stand":
                     tutorial_point = "crouch obstacle highlight" 
@@ -442,7 +448,7 @@ while True:
                 else:
                     tutorial_completed = True            
                     tutorial_point = "done" 
-                obstacles_avoided = 0  
+                 
             # remove obstacles that have gone off the bottom of the screen and add new obstacles
             for obstacle in obstacles:
                 if obstacle.y > HEIGHT:
@@ -452,8 +458,7 @@ while True:
                     obstacles.add(new_obstacle)
                     obstacle_counter += 1
             
-        # drawing the collision zone
-            pygame.draw.polygon(screen, BLUE, vertices)
+        
             
             # drawing the obstacles
             for obstacle in obstacles:
