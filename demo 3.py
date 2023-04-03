@@ -30,7 +30,7 @@ fps = video.get(cv2.CAP_PROP_FPS)
 screen = pygame.display.set_mode(video_image.shape[1::-1])
 WIDTH = screen.get_width()
 HEIGHT = screen.get_height()
-pygame.display.set_caption("Endless Runner")
+pygame.display.set_caption("Immersive Fitness Experience")
 
 
 
@@ -81,6 +81,12 @@ mp_pose = mp.solutions.pose
 # Start video capture
 cap = cv2.VideoCapture(0)
 
+
+def draw_line_round_corners(surf, p1, p2, c, w):
+    pygame.draw.line(surf, c, p1, p2, w)
+    pygame.draw.circle(surf, c, p1, w // 2)
+    pygame.draw.circle(surf, c, p2, w // 2)
+
 def checkHandsJoined(landmarks): 
     # Get the left wrist landmark x and y coordinates.
     left_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x * WIDTH,
@@ -94,7 +100,7 @@ def checkHandsJoined(landmarks):
     euclidean_distance = int(math.hypot(left_wrist_landmark[0] - right_wrist_landmark[0],
                                    left_wrist_landmark[1] - right_wrist_landmark[1]))
     # Compare the distance between the wrists with a appropriate threshold to check if both hands are joined.
-    if euclidean_distance < HEIGHT * 0.07:  
+    if euclidean_distance < 130:  
         return True
     return False
 
@@ -292,7 +298,6 @@ while True:
     
     #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
-        # start_environment = random.choice(environments)
         video = cv2.VideoCapture(start_environment)
         frame_counter = 0
         # video = cv2.VideoCapture(start_environment)
@@ -309,7 +314,7 @@ while True:
         x1, y1 = player.landmarks[0]
         x2, y2 = player.landmarks[8]
         r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-        color = WHITE
+        color = RED
         line_width = 15
         pygame.draw.polygon(screen, color, [player.landmarks[11],player.landmarks[12],player.landmarks[24],player.landmarks[23]])
         pygame.draw.circle(screen, color, player.landmarks[0], r * 1.3, width=0)
@@ -338,6 +343,33 @@ while True:
         pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[29], width=line_width)
         pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[31], width=line_width)
         pygame.draw.line(screen, color, player.landmarks[29], player.landmarks[31], width=line_width)
+
+        #rounded character version
+        # draw_line_round_corners(screen, player.landmarks[12], player.landmarks[14], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[14], player.landmarks[16], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[22], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[18], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[20], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[18], player.landmarks[20], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[12], player.landmarks[24], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[24], player.landmarks[26], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[26], player.landmarks[28], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[28], player.landmarks[30], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[28], player.landmarks[32], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[30], player.landmarks[32], color, line_width)
+
+        # draw_line_round_corners(screen, player.landmarks[11], player.landmarks[13], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[13], player.landmarks[15], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[21], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[17], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[19], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[17], player.landmarks[19], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[11], player.landmarks[23], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[23], player.landmarks[25], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[25], player.landmarks[27], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[27], player.landmarks[29], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[27], player.landmarks[31], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[29], player.landmarks[31], color, line_width)
     
     # Check if the left and right hands are joined & the tutorial is completed.
     if tutorial_hands_joined == False:
@@ -650,7 +682,7 @@ while True:
                     else:
                         notif = "move now!"
                     notif_rect = font.render(f"{notif}", True, RED)
-                    ptext.draw(notif, (WIDTH / 6 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(notif, (WIDTH / 6.5 - notif_rect.get_rect().width / 2, HEIGHT / 6), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if obstacle.y > y1 and obstacle.y < y3:
                     for x, y in player.landmarks:
