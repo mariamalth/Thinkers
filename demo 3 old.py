@@ -9,24 +9,40 @@ from csv import writer
 import pandas as pd
 import ptext
 
+#Initialize background music 
+pygame.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+
+pygame.mixer.init()
+
+pygame.mixer.music.load('background.mp3')
+
+pygame.mixer.music.play(-1)
+
 # Initialize Pygame window
 pygame.init()
-video = cv2.VideoCapture("desertscape.mp4")
+
+#set up the video randomization
+environments = ["oceanscape.mp4","desertscape.mp4"]
+start_environment = random.choice(environments)
+video = cv2.VideoCapture(start_environment)
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
 screen = pygame.display.set_mode(video_image.shape[1::-1])
 WIDTH = screen.get_width()
 HEIGHT = screen.get_height()
-pygame.display.set_caption("Endless Runner")
+pygame.display.set_caption("Immersive Fitness Experience")
+
+
+
+print(130 / HEIGHT)
 
 # set up the colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
+BLUE = (56, 239, 245)
 GREEN = (0, 255, 0)
 RED = (255,0,0)
 
-# BLUE = (13,152,186)
 #set up the fonts 
 font = pygame.font.Font('Dream MMA.ttf',22)
 font2 = pygame.font.Font('Dream MMA.ttf',32)
@@ -65,6 +81,12 @@ mp_pose = mp.solutions.pose
 # Start video capture
 cap = cv2.VideoCapture(0)
 
+
+def draw_line_round_corners(surf, p1, p2, c, w):
+    pygame.draw.line(surf, c, p1, p2, w)
+    pygame.draw.circle(surf, c, p1, w // 2)
+    pygame.draw.circle(surf, c, p2, w // 2)
+
 def checkHandsJoined(landmarks): 
     # Get the left wrist landmark x and y coordinates.
     left_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x * WIDTH,
@@ -98,47 +120,6 @@ def addObstacle():
     obstacles.add(new_obstacle)
     obstacle_counter += 1
 
-def checkLeftRight(landmarks):
-
-    # Declare a variable to store the horizontal position (left, center, right) of the person.
-    horizontal_position = None
-    width = 1280
-    
-    # Retreive the x-coordinate of the left shoulder landmark.
-    left_x = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x * width)
-
-    # Retreive the x-corrdinate of the right shoulder landmark.
-    right_x = int(results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x * width)
-    
-    # Check if the person is at left that is when both shoulder landmarks x-corrdinates
-    # are less than or equal to the x-corrdinate of the center of the image.
-    margin = WIDTH / 10
-    left_boundry = width//2 - margin
-    right_boundry = width//2 + margin
-    if (right_x <= left_boundry and left_x <= left_boundry):
-        
-        # Set the person's position to left.
-        horizontal_position = 'Left'
-
-    # Check if the person is at right that is when both shoulder landmarks x-corrdinates
-    # are greater than or equal to the x-corrdinate of the center of the image.
-    elif (right_x >= right_boundry and left_x >= right_boundry):
-        
-        # Set the person's position to right.
-        horizontal_position = 'Right'
-    
-    # Check if the person is at center that is when right shoulder landmark x-corrdinate is greater than or equal to
-    # and left shoulder landmark x-corrdinate is less than or equal to the x-corrdinate of the center of the image.
-    # elif (right_x >= width//2 and left_x <= width//2):
-    else:
-        
-        # Set the person's position to center.
-        horizontal_position = 'Center'
-        
-
-        # Return the output image and the person's horizontal position.
-    return horizontal_position  
-
 
 class Player():
     def __init__(self):
@@ -158,7 +139,7 @@ class Player():
             
             factor = 0.5
             center_x = screen.get_width() / 2
-            center_y = screen.get_height() * (1.5-factor)
+            center_y = screen.get_height() * (1.45-factor)
     
             # Map landmarks to Pygame coordinates
             x = landmarks[:, 0]
@@ -206,7 +187,7 @@ class Obstacle(pygame.sprite.Sprite):
     b_line = 752 / 2
     distance = 370
     side = (distance) / (1-(s_line/b_line))
-    speed = 5
+    speed = 8
     def __init__(self, position, style):
         super().__init__()
         self.style = style
@@ -267,7 +248,7 @@ class Obstacle(pygame.sprite.Sprite):
     def update(self):
         # start_point = HEIGHT - Obstacle.distance - self.height
         # move the obstacle down the screen
-        self.y += Obstacle.speed + self.height / 5
+        self.y += Obstacle.speed + self.height 
         d = (self.y - self.start_point) + (Obstacle.side - Obstacle.distance)
         rate = (size(Obstacle.side,Obstacle.b_line,d)) / (Obstacle.s_line)
         self.height = self.get_height() * rate
@@ -301,13 +282,15 @@ ankle_y = 0
 # Main loop
 while True:
     frame_counter+=1
-    print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
+    print(f"environment: {start_environment} \n tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     # Read frame from camera
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
     
     # Convert frame to RGB
     rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # start_environment = random.choice(environments)
+    # video = cv2.VideoCapture(start_environment)
     success, video_image = video.read()
     if success: 
         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
@@ -315,8 +298,9 @@ while True:
     
     #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
+        video = cv2.VideoCapture(start_environment)
         frame_counter = 0
-        video = cv2.VideoCapture("desertscape.mp4")
+        # video = cv2.VideoCapture(start_environment)
 
     # Detect pose landmarks
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
@@ -325,78 +309,80 @@ while True:
         player.update(landmarks)
         obstacles.update()
             
-        # Draw landmarks as circles on Pygame window
-        if player.landmarks:
-            x1, y1 = player.landmarks[0]
-            x2, y2 = player.landmarks[8]
-            r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
-            color = WHITE
-            line_width = 15
-            # Get horizontal position of the person in the frame.
-            horizontal_position = checkLeftRight(landmarks)
-            # Check if the person has moved to left from center or to center from right.
-            if (horizontal_position=='Left' and x_pos_index!=0) or (horizontal_position=='Center' and x_pos_index==2):    
-                movement = "right"
-                
-                # Update the horizontal position index of the character.
-                x_pos_index -= 1               
- 
-            # Check if the person has moved to Right from center or to center from left.
-            elif (horizontal_position=='Right' and x_pos_index!=2) or (horizontal_position=='Center' and x_pos_index==0):
-                # Press the right arrow key.
-                movement = "left"
-                
-                # Update the horizontal position index of the character.
-                x_pos_index += 1
-            # Check if the left and right hands are joined & the tutorial is completed.
+    # Draw character
+    if player.landmarks:
+        x1, y1 = player.landmarks[0]
+        x2, y2 = player.landmarks[8]
+        r = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)  
+        color = RED
+        line_width = 15
+        pygame.draw.polygon(screen, color, [player.landmarks[11],player.landmarks[12],player.landmarks[24],player.landmarks[23]])
+        pygame.draw.circle(screen, color, player.landmarks[0], r * 1.3, width=0)
+        pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[14], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[14], player.landmarks[16], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[22], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[18], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[20], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[18], player.landmarks[20], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[24], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[24], player.landmarks[26], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[26], player.landmarks[28], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[30], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[32], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[30], player.landmarks[32], width=line_width)
+        
+        pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[13], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[13], player.landmarks[15], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[21], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[17], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[19], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[17], player.landmarks[19], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[23], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[23], player.landmarks[25], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[25], player.landmarks[27], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[29], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[31], width=line_width)
+        pygame.draw.line(screen, color, player.landmarks[29], player.landmarks[31], width=line_width)
+
+        #rounded character version
+        # draw_line_round_corners(screen, player.landmarks[12], player.landmarks[14], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[14], player.landmarks[16], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[22], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[18], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[16], player.landmarks[20], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[18], player.landmarks[20], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[12], player.landmarks[24], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[24], player.landmarks[26], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[26], player.landmarks[28], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[28], player.landmarks[30], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[28], player.landmarks[32], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[30], player.landmarks[32], color, line_width)
+
+        # draw_line_round_corners(screen, player.landmarks[11], player.landmarks[13], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[13], player.landmarks[15], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[21], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[17], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[15], player.landmarks[19], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[17], player.landmarks[19], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[11], player.landmarks[23], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[23], player.landmarks[25], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[25], player.landmarks[27], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[27], player.landmarks[29], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[27], player.landmarks[31], color, line_width)
+        # draw_line_round_corners(screen, player.landmarks[29], player.landmarks[31], color, line_width)
+    
+    # Check if the left and right hands are joined & the tutorial is completed.
+    if tutorial_hands_joined == False:
+        if landmarks:
+        
             if checkHandsJoined(landmarks):
             #if hands joined for the first time or after reset, set tutorial hands completed to actually start tutorial and move from welcome screen
-                if tutorial_hands_joined == False: #or reset == True:
-                    tutorial_hands_joined = True
-                    #store initial position of random landmark 
-                    random_landmark = player.landmarks[12]
-                    #change tutorial point to first point, the motion detection highlight
-                    tutorial_point = "motion detection highlight"
-    
-            
-            pygame.draw.polygon(screen, color, [player.landmarks[11],player.landmarks[12],player.landmarks[24],player.landmarks[23]])
-            pygame.draw.circle(screen, color, player.landmarks[0], r * 1.3, width=0)
-            pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[14], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[14], player.landmarks[16], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[22], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[18], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[16], player.landmarks[20], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[18], player.landmarks[20], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[12], player.landmarks[24], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[24], player.landmarks[26], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[26], player.landmarks[28], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[30], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[28], player.landmarks[32], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[30], player.landmarks[32], width=line_width)
-            
-            pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[13], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[13], player.landmarks[15], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[21], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[17], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[15], player.landmarks[19], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[17], player.landmarks[19], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[11], player.landmarks[23], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[23], player.landmarks[25], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[25], player.landmarks[27], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[29], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[27], player.landmarks[31], width=line_width)
-            pygame.draw.line(screen, color, player.landmarks[29], player.landmarks[31], width=line_width)
+                tutorial_hands_joined = True
+                #store initial position of random landmark 
+                random_landmark = player.landmarks[12]
+                #change tutorial point to first point, the motion detection highlight
+                tutorial_point = "motion detection highlight"
 
-    #Tutorial section
-     #players' first time playing, has not joined hands yet
-    if tutorial_hands_joined == False:
-        # print("test")
-        #for experience resetting
-        # if reset == True:
-        #     countdown, countdown_seconds = 15, '15'
-        #     # only reset once so change reset back to false
-        #     reset = False
-        #     obstacles.empty()
         welcome = "welcome..."
         welcome_rect = font2.render(f"{welcome}", True, WHITE)
         join = "join your hands to start"
@@ -419,16 +405,16 @@ while True:
                 if player.landmarks:
                     #store state of that random landmark
                     movement_check = player.landmarks[12]
-                #check that the landmark has moved around enough, hence player moved around
-                if abs(movement_check[0]-random_landmark[0]) >=100 :
-                    #move to next point in tutorial
-                    tutorial_point = "obstacles highlight"
+                    #check that the landmark has moved around enough, hence player moved around
+                    if abs(movement_check[0]-random_landmark[0]) >=HEIGHT * 0.1 :
+                        #move to next point in tutorial
+                        tutorial_point = "obstacles highlight"
                     # tutorial_completed = True
             if tutorial_point == "obstacles highlight":
                  #show users standing obstacles and concept of game
                 tutorial = "you will have to avoid different incoming obstacles, get ready!"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
@@ -440,7 +426,9 @@ while True:
                     pass
                 # seting up the colison zone
                 y1 = y2 = obstacle.get_colision_line(nose_y,ankle_y)
-                y3 = y4 = y1 + 30
+                # y1 -= r*2
+                # y2 -= r*2
+                y3 = y4 = y1 + 10
                 d1 = (y1 - HEIGHT + Obstacle.distance) + (Obstacle.side - Obstacle.distance)
                 d2 = (y3 - HEIGHT + Obstacle.distance) + (Obstacle.side - Obstacle.distance)
                 w1 = (d1 * Obstacle.b_line) / Obstacle.side
@@ -469,7 +457,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 3:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_point = "crouch obstacle highlight" 
                     obstacles_avoided = 0  
@@ -493,7 +481,7 @@ while True:
             if tutorial_point == "crouch obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, squat below the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
 
                 if len(obstacles) == 0:
@@ -525,7 +513,7 @@ while True:
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
                         notif = "squat now!"
                         notif_rect = font.render(f"{notif}", True, RED)
-                        ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(notif, (WIDTH / 5 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 # colision handling
                 if player.landmarks:
@@ -544,7 +532,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 3:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_point = "jump obstacle highlight"  
                     obstacles_avoided = 0   
@@ -568,7 +556,7 @@ while True:
             if tutorial_point == "jump obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, do a jumping jack high above the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6.5), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
@@ -599,7 +587,7 @@ while True:
                 if (y1-obstacle.y)<=110 and obstacle.y <y3:
                     notif = "jump now!"
                     notif_rect = font.render(f"{notif}", True, RED)
-                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 2), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(notif, (WIDTH / 5 - notif_rect.get_rect().width / 2, HEIGHT / 4.5), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 # colision handling
                 if player.landmarks:
@@ -620,7 +608,7 @@ while True:
                             #reset variable for next obstacle
                             hit_obstacle = False  
                 #TO DO:play around with number
-                if obstacles_avoided == 1:
+                if obstacles_avoided == 0:
                     obstacles.empty()
                     tutorial_completed = True            
                     tutorial_point = "done"
@@ -685,6 +673,17 @@ while True:
             vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
             # colision handling
             if player.landmarks:
+                # notify player when to do exercise/when obstacle is coming up
+                if (y1-obstacle.y)<=110 and obstacle.y <y3:
+                    if obstacle.style == "jump":
+                        notif = "squat now"
+                    elif obstacle.style == "crouch":
+                        notif = "jump now!"
+                    else:
+                        notif = "move now!"
+                    notif_rect = font.render(f"{notif}", True, RED)
+                    ptext.draw(notif, (WIDTH / 6.5 - notif_rect.get_rect().width / 2, HEIGHT / 6), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
                 if obstacle.y > y1 and obstacle.y < y3:
                     for x, y in player.landmarks:
                         temp_rect = pygame.Rect(x, y, 1, 1)
@@ -693,11 +692,11 @@ while True:
                                 if player.lives !=0:
                                     # print("hit player, warn next time")
                                     player.lives -= 1
-                                elif player.lives == 0:
+                                if player.lives == 0:
                                     # player has no lives left
                                     # Create randomly generated username for player
                                     # generating random strings
-                                    if username ==None:
+                                    # if username == None:
                                         username = player.username
                                         user_score = [username,int(score)]
                                         #!! in the end, this needs to be modified for the leaderboard to store the top 10
@@ -748,6 +747,9 @@ while True:
             data = data.sort_values(by=['Score'], ascending=False)
             # get the top 10 scores 
             data = data.head(10)
+            #save the leaderboard to the updated csv so there will always be only 10 rows stored
+            csv_save = data
+            csv_save.to_csv("leaderboard.csv", index=False) 
             usernames = data.loc[:,"Username"]
             #offset so the rows show one after the other
             offset=0
@@ -765,14 +767,20 @@ while True:
                     leader_row_rect = font.render(f"{leader_row}", True, WHITE)
                     ptext.draw(leader_row, (WIDTH / 2 - leader_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
-                offset+=30
-            #save the leaderboard to the updated csv so there will always be only 10 rows stored
-            csv_save = data
-            csv_save.to_csv("leaderboard.csv", index=False)       
+                offset+=30      
 
             #Player chooses to restart experience
             if player.landmarks:
                 if checkHandsJoined(landmarks):
+                    start_environment = random.choice(environments)
+                    
+                    #re-capture video and reset frame counter
+                    video = cv2.VideoCapture(start_environment)                    
+                    success, video_image = video.read()
+                    if success: 
+                        video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+                    screen.blit(video_surf, (0, 0))
+                    frame_counter = 0
                     player.lives+=3
                     score = 0
                     
@@ -781,6 +789,13 @@ while True:
                     #pygame.time.set_timer(pygame.USEREVENT, 1500)
         #Player has not restarted, reset experience
         if countdown == 0:
+            start_environment = random.choice(environments)
+            #re-capture video and reset frame counter
+            video = cv2.VideoCapture(start_environment)                    
+            success, video_image = video.read()
+            if success: 
+                video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
+            screen.blit(video_surf, (0, 0))
             #reset the players attributes
             player.username =  ''.join(random.choices(string.ascii_uppercase, k=5))
             player.lives +=3
