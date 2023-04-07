@@ -18,7 +18,7 @@ background_image = pygame.image.load("background.png")
 WIDTH = background_image.get_width()
 HEIGHT = background_image.get_height()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-video = cv2.VideoCapture("background2.mp4")
+video = cv2.VideoCapture("desertscape.mp4")
 success, video_image = video.read()
 # video_length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 

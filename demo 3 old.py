@@ -696,20 +696,20 @@ while True:
                                     # player has no lives left
                                     # Create randomly generated username for player
                                     # generating random strings
-                                    # if username == None:
-                                        username = player.username
-                                        user_score = [username,int(score)]
-                                        #!! in the end, this needs to be modified for the leaderboard to store the top 10
-                                        with open('leaderboard.csv', 'a+', newline='\n') as write_obj:
-                                            # Create a writer object from csv module
-                                            csv_writer = writer(write_obj)
-                                            # Add contents of list as last row in the csv file
-                                            csv_writer.writerow(user_score)
-                                    #end the game
-                                    # to-do
+                                    username = player.username
+                                    user_score = [username,int(score)]
+                                    print("!!!!!!!!!!")
+                                    print(user_score)
+                                    with open('leaderboard.csv', 'a+', newline='\n') as write_obj:
+                                        # Create a writer object from csv module
+                                        csv_writer = writer(write_obj)
+                                        # Add contents of list as last row in the csv file
+                                        csv_writer.writerow(user_score)
+                                    # Add the new row to the dataframe
+                                    data.loc[len(data)] = user_score
+                                    break
                                 obstacles.empty()
-                                break
-                                
+                  
             # remove obstacles that have gone off the bottom of the screen and add new obstacles
             for obstacle in obstacles:
                 if obstacle.y > HEIGHT:
@@ -745,6 +745,7 @@ while True:
             
             #order dataset based on highest scores
             data = data.sort_values(by=['Score'], ascending=False)
+            print(data)
             # get the top 10 scores 
             data = data.head(10)
             #save the leaderboard to the updated csv so there will always be only 10 rows stored
@@ -798,6 +799,7 @@ while True:
             screen.blit(video_surf, (0, 0))
             #reset the players attributes
             player.username =  ''.join(random.choices(string.ascii_uppercase, k=5))
+            username = None
             player.lives +=3
             score = 0
             

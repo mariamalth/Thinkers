@@ -23,7 +23,7 @@ pygame.init()
 
 #set up the video randomization
 environments = ["oceanscape.mp4","desertscape.mp4","mountainscape.mp4"]
-start_environment = "desertscape.mp4"
+start_environment = random.choice(environments)
 video = cv2.VideoCapture(start_environment)
 success, video_image = video.read()
 fps = video.get(cv2.CAP_PROP_FPS)
@@ -68,7 +68,11 @@ tutorial_completed = False
 tutorial_hands_joined = False
 tutorial_point = "not started"
 
-random_landmark = (0,0)
+random_landmarks = [[0],[0]]
+moved_check = False
+
+motion_timer = 0
+collision_timer = 0
 
 obstacles_avoided = 0
 
@@ -290,7 +294,7 @@ lvl = 1
 # Main loop
 while True:
     frame_counter+=1
-    # print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
+    print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     # Read frame from camera
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
@@ -300,7 +304,7 @@ while True:
     success, video_image = video.read()
     if success: 
         video_surf = pygame.image.frombuffer(video_image.tobytes(), video_image.shape[1::-1], "BGR")
-    # screen.blit(video_surf, (0, 0))
+    screen.blit(video_surf, (0, 0))
     
     #video loop 
     if frame_counter == video.get(cv2.CAP_PROP_FRAME_COUNT):
@@ -357,16 +361,25 @@ while True:
         join_rect = font2.render(f"{join}", True, WHITE)
         ptext.draw(welcome, (WIDTH / 2 - welcome_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
         ptext.draw(join, (WIDTH / 2 - join_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
+
+        #accordance to data and privacy laws notice 
+        law = "this experience acts in accordance with \n qatar's data protection and privacy laws"
+        law_rect = font.render(f"{law}", True, WHITE)
+        ptext.draw(law, (10, HEIGHT - 40), color=WHITE, fontname=font_name, fontsize=8,shadow=(1.0,1.0))
         #if hands joined for the first time or after reset, set tutorial hands completed to actually start tutorial and move from welcome screen
         if landmarks:
             if checkHandsJoined(landmarks):
                 tutorial_hands_joined = True
-                #store initial position of random landmark 
-                random_landmark = player.landmarks[12]
+                #store initial position of random landmarks 
+                random_landmarks[0] = player.landmarks[12]
+                random_landmarks[1] = player.landmarks[2]
                 #change tutorial point to first point, the motion detection highlight
                 tutorial_point = "motion detection highlight"
                 # set-up the collision zone
                 nose_y, ankle_y = player.landmarks[0][1], player.landmarks[28][1]
+
+                #store the motion timer for the tutorial 
+                motion_timer = pygame.time.get_ticks()
 
     
                 
@@ -376,21 +389,103 @@ while True:
     # All the different points and screens of the tutorial, past welcome screen
     elif tutorial_completed == False:
             if tutorial_point=="motion detection highlight":
+                now = pygame.time.get_ticks()
+                delay = 5000 #5 seconds
                 #encourage user to move left and right and move arms around
                 tutorial = "this experience is based on motion detection, try moving around!"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
                 ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                 
+                
                 #check that they moved around
                 if player.landmarks:
-                    #store state of that random landmark
-                    movement_check = player.landmarks[12]
-                    #check that the landmark has moved around enough, hence player moved around
-                    if abs(movement_check[0]-random_landmark[0]) >=HEIGHT * 0.08 :
-                        #move to next point in tutorial
+                    #store state of the random landmarks
+                    movement_check= [player.landmarks[12], player.landmarks[2]]
+                    #check that the first stored landmark has moved around enough, hence player moved around
+                    if abs(movement_check[0][0]-random_landmarks[0][0]) >=HEIGHT * 0.08 :
+                        moved_check = True
+                    
+                    # a second check of another landmark to lengthen tutorial !keep adding checks to lengthen even more
+                    if moved_check:
+                        if abs(movement_check[1][0]-random_landmarks[1][0]) >=HEIGHT * 0.08 and ( now > motion_timer + delay ) :
+                            #move to next point in tutorial
+                            tutorial_point = "collision line highlight"
+                            collision_timer = pygame.time.get_ticks() 
+                    
+            if tutorial_point == "collision line highlight":
+                    dummy_obstacle = Obstacle("center","stand")                
+                    now = pygame.time.get_ticks()
+                    delay = 5000 #5 seconds
+                    if ( now < collision_timer + delay ):
+                        tutorial = "in this experience, different obstacles will come towards you"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        
+                    if (now > collision_timer + delay) & (now < collision_timer + (delay*4)):
+                        tutorial = "if your character touches the obstacle \n while in the colored line, you get hit!"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH / 4.5, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+                        x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                        # drawing the collision zone
+                        pygame.draw.polygon(screen, BLUE, vertices)
+                    
+                    if (now > collision_timer + (delay*4)) & (now < collision_timer + (delay*8)):
+                        tutorial = "the position of the line changes based on the obstacle coming towards you \n, so, you'll have to do different exercises to avoid them!"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        
+                        x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                        # drawing the collision zone
+                        pygame.draw.polygon(screen, BLUE, vertices)
+                    if (now > collision_timer + (delay*8)) & (now < collision_timer + (delay*10)):
+                        position = "this line is created based on your mid range"
+                        position_rect = font.render(f"{position}", True, WHITE)
+                        ptext.draw(position, (WIDTH / 2 - position_rect.get_rect().width / 2,HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        
+                        x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                        # drawing the collision zone
+                        pygame.draw.polygon(screen, BLUE, vertices)
+                    
+                    
+                    if now > (collision_timer + (delay*10)):
+                        if dummy_obstacle.style == "stand":
+                            obstacles.empty()
+                            #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
+                            dummy_obstacle = Obstacle("center","jump")     
+                    if (now > collision_timer + (delay*10)) & (now < collision_timer + (delay*14)):
+                        tutorial = "this line is created based on your head range"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+                        x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                        # drawing the collision zone
+                        pygame.draw.polygon(screen, BLUE, vertices)
+                    
+                    if now > (collision_timer + (delay*14)):
+                        if dummy_obstacle.style == "stand":
+                            obstacles.empty()
+                            #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
+                            dummy_obstacle = Obstacle("center","crouch")     
+                    if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*18)):
+                        tutorial = "this line is created based on your ankle range"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+                        x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                        # drawing the collision zone
+                        pygame.draw.polygon(screen, BLUE, vertices)
+                    
+                    if (now > collision_timer + (delay*18)):
                         tutorial_point = "obstacles highlight"
-                    
-                    
+                        obstacles.empty()
+
+                        
             if tutorial_point == "obstacles highlight":
                  #show users standing obstacles and concept of game
                 tutorial = "you will have to avoid different incoming obstacles, get ready!"
@@ -410,7 +505,7 @@ while True:
                 ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                 style = "crouch"
                 
-            if not tutorial_point=="motion detection highlight":
+            if tutorial_point!= "motion detection highlight" and tutorial_point != "collision line highlight":
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
                     new_obstacle = Obstacle(position,style)
@@ -455,7 +550,7 @@ while True:
                             hit_obstacle = False  
                         print(str(hit_obstacle) + " " + style)
             #TO DO:play around with number
-            if obstacles_avoided == 1:
+            if obstacles_avoided == 2:
                 obstacles_avoided = 0 
                 obstacles.empty()
                 if style == "stand":
@@ -494,12 +589,7 @@ while True:
             if results.pose_landmarks:
                 if checkHandsJoined(landmarks):
                     game_started = True
-                    # if player.lives >0:
-                    #     screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
-                    #     screen.blit(font.render(f"lives: {player.lives}", True, WHITE), (WIDTH - 150, 10))
-    
-    
-     #should be fine to keep just as game started bc & tutorial_completed is safety measure           
+               
     if game_started:
         if player.lives !=0:
             screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
@@ -544,6 +634,7 @@ while True:
                                             csv_writer = writer(write_obj)
                                             # Add contents of list as last row in the csv file
                                             csv_writer.writerow(user_score)
+                                        data.loc[len(data)] = user_score
                                     #end the game
                                     # to-do
                                 obstacles.empty()
@@ -591,6 +682,7 @@ while True:
             data = data.sort_values(by=['Score'], ascending=False)
             # get the top 10 scores 
             data = data.head(10)
+            print(data)
             #save the leaderboard to the updated csv so there will always be only 10 rows stored
             csv_save = data
             csv_save.to_csv("leaderboard.csv", index=False) 
@@ -663,6 +755,9 @@ while True:
             cv2.destroyAllWindows()
             pygame.quit()
             exit(0)
+        if tutorial_point == "collision line highlight":
+            if event.type == pygame.USEREVENT:
+                timer-=1
          # countdown for restarting
         if player.lives == 0:
             if event.type == pygame.USEREVENT: 
