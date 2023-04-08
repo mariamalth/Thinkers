@@ -413,9 +413,13 @@ while True:
                             collision_timer = pygame.time.get_ticks() 
                     
             if tutorial_point == "collision line highlight":
+                    #create a dummy obstacle that the collision line shown will represent
                     dummy_obstacle = Obstacle("center","stand")                
+                    #timer variables so the text shows for x seconds
                     now = pygame.time.get_ticks()
                     delay = 5000 #5 seconds
+
+                    #parts are sequential - follow one another based on multiplaction of delay
                     if ( now < collision_timer + delay ):
                         tutorial = "in this experience, different obstacles will come towards you"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
@@ -432,6 +436,7 @@ while True:
                         pygame.draw.polygon(screen, BLUE, vertices)
                     
                     if (now > collision_timer + (delay*4)) & (now < collision_timer + (delay*8)):
+                        #TO DO: FIX
                         tutorial = "the position of the line changes based on the obstacle coming towards you \n, so, you'll have to do different exercises to avoid them!"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
                         ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
@@ -456,7 +461,7 @@ while True:
                             obstacles.empty()
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
                             dummy_obstacle = Obstacle("center","jump")     
-                    if (now > collision_timer + (delay*10)) & (now < collision_timer + (delay*14)):
+                    if (now > collision_timer + (delay*10)) & (now < collision_timer + (delay*12)):
                         tutorial = "this line is created based on your head range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
                         ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
@@ -466,12 +471,12 @@ while True:
                         # drawing the collision zone
                         pygame.draw.polygon(screen, BLUE, vertices)
                     
-                    if now > (collision_timer + (delay*14)):
-                        if dummy_obstacle.style == "stand":
+                    if now > (collision_timer + (delay*12)):
+                        if dummy_obstacle.style == "jump":
                             obstacles.empty()
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
                             dummy_obstacle = Obstacle("center","crouch")     
-                    if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*18)):
+                    if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*14)):
                         tutorial = "this line is created based on your ankle range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
                         ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
@@ -480,10 +485,30 @@ while True:
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
                         # drawing the collision zone
                         pygame.draw.polygon(screen, BLUE, vertices)
-                    
-                    if (now > collision_timer + (delay*18)):
-                        tutorial_point = "obstacles highlight"
+                    if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*18)):
+                        tutorial = "so, you don't have to move backwards or forwards just:"
+                        tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                        ptext.draw(tutorial, (WIDTH/8, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+                        if (now > collision_timer + (delay*15)) & (now < collision_timer + (delay*18)):
+                             stand = "do a jump to the left, center, or right"
+                             stand_rect = font.render(f"{stand}", True, WHITE)
+                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        
+                        if (now > collision_timer + (delay*16)) & (now < collision_timer + (delay*18)):
+                             crouch = "do a squat"
+                             crouch_rect = font.render(f"{crouch}", True, WHITE)
+                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        
+                        if (now > collision_timer + (delay*17)) & (now < collision_timer + (delay*18)):
+                             jump = "do a jumping jack"
+                             jump_rect = font.render(f"{jump}", True, WHITE)
+                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+
+                    if (now > collision_timer + (delay*19)):
                         obstacles.empty()
+                        tutorial_point = "obstacles highlight"
+                        
 
                         
             if tutorial_point == "obstacles highlight":
@@ -755,9 +780,12 @@ while True:
             cv2.destroyAllWindows()
             pygame.quit()
             exit(0)
+        if tutorial_point == "motion detection highlight":
+            if event.type == pygame.USEREVENT:
+                motion_timer-=1
         if tutorial_point == "collision line highlight":
             if event.type == pygame.USEREVENT:
-                timer-=1
+                collision_timer-=1
          # countdown for restarting
         if player.lives == 0:
             if event.type == pygame.USEREVENT: 
