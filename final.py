@@ -424,8 +424,19 @@ while True:
                             collision_timer = pygame.time.get_ticks() 
                     
             if tutorial_point == "collision line highlight":
-                    #create a dummy obstacle that the collision line shown will represent
-                    dummy_obstacle = Obstacle("center","stand")                
+                    style = "stand"
+                    position = "center"
+                    if style == "jump":
+                        img_style = "crouch"
+                    else:
+                        img_style = style
+                    img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                    img = Image.open(img_file)
+                    r = 15/img.size[1]
+                    initial_width = img.size[0] * r 
+                    initial_height = img.size[1] * r
+                    dummy_obstacle = Obstacle(position,style,initial_width,initial_height,img)
+                    now = pygame.time.get_ticks()           
                     #timer variables so the text shows for x seconds
                     now = pygame.time.get_ticks()
                     delay = 5000 #5 seconds
@@ -471,7 +482,18 @@ while True:
                         if dummy_obstacle.style == "stand":
                             obstacles.empty()
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
-                            dummy_obstacle = Obstacle("center","jump")     
+                            style = "jump"
+                            position = "center"
+                            if style == "jump":
+                                img_style = "crouch"
+                            else:
+                                img_style = style
+                            img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                            img = Image.open(img_file)
+                            r = 15/img.size[1]
+                            initial_width = img.size[0] * r 
+                            initial_height = img.size[1] * r
+                            dummy_obstacle = Obstacle(position,style,initial_width,initial_height,img)    
                     if (now > collision_timer + (delay*10)) & (now < collision_timer + (delay*12)):
                         tutorial = "this line is created based on your head range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
@@ -486,7 +508,18 @@ while True:
                         if dummy_obstacle.style == "jump":
                             obstacles.empty()
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
-                            dummy_obstacle = Obstacle("center","crouch")     
+                            style = "crouch"
+                            position = "center"
+                            if style == "jump":
+                                img_style = "crouch"
+                            else:
+                                img_style = style
+                            img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                            img = Image.open(img_file)
+                            r = 15/img.size[1]
+                            initial_width = img.size[0] * r 
+                            initial_height = img.size[1] * r
+                            dummy_obstacle = Obstacle(position,style,initial_width,initial_height,img)   
                     if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*14)):
                         tutorial = "this line is created based on your ankle range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
