@@ -271,7 +271,7 @@ class Obstacle(pygame.sprite.Sprite):
     def update(self):
         # start_point = HEIGHT - Obstacle.distance - self.height
         # move the obstacle down the screen
-        self.y += Obstacle.speed + self.height / 5
+        self.y += Obstacle.speed
         d = (self.y - self.start_point) + (Obstacle.side - Obstacle.distance)
         rate = (size(Obstacle.side,Obstacle.b_line,d)) / (Obstacle.s_line)
         self.height = self.initial_height * rate
@@ -392,11 +392,6 @@ while True:
                 #store the motion timer for the tutorial 
                 motion_timer = pygame.time.get_ticks()
 
-    
-                
-
-
-            
     # All the different points and screens of the tutorial, past welcome screen
     elif tutorial_completed == False:
             if tutorial_point=="motion detection highlight":
@@ -420,7 +415,7 @@ while True:
                     if moved_check:
                         if abs(movement_check[1][0]-random_landmarks[1][0]) >=HEIGHT * 0.08 and ( now > motion_timer + delay ) :
                             #move to next point in tutorial
-                            tutorial_point = "collision line highlight"
+                            tutorial_point = "obstacles highlight"
                             collision_timer = pygame.time.get_ticks() 
                     
             if tutorial_point == "collision line highlight":
@@ -575,7 +570,16 @@ while True:
             if tutorial_point!= "motion detection highlight" and tutorial_point != "collision line highlight":
                 if len(obstacles) == 0:
                     position = ["center","left","right"][obstacle_counter % 3]
-                    new_obstacle = Obstacle(position,style)
+                    if style == "jump":
+                        img_style = "crouch"
+                    else:
+                        img_style = style
+                    img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                    img = Image.open(img_file)
+                    r = 15/img.size[1]
+                    initial_width = img.size[0] * r 
+                    initial_height = img.size[1] * r
+                    new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
                     obstacles.add(new_obstacle)
                     obstacle_counter += 1
                     for obstacle in obstacles:
@@ -633,7 +637,16 @@ while True:
                 if obstacle.y > HEIGHT:
                     obstacles.remove(obstacle)
                     position = ["center","left","right"][obstacle_counter % 3]
-                    new_obstacle = Obstacle(position,style)
+                    if style == "jump":
+                        img_style = "crouch"
+                    else:
+                        img_style = style
+                    img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                    img = Image.open(img_file)
+                    r = 15/img.size[1]
+                    initial_width = img.size[0] * r 
+                    initial_height = img.size[1] * r
+                    new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
                     obstacles.add(new_obstacle)
                     obstacle_counter += 1
             
