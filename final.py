@@ -531,17 +531,20 @@ while True:
                         if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*15)):
                              stand = "do a jump to the left, center, or right"
                              stand_rect = font.render(f"{stand}", True, WHITE)
-                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                             col = GREEN 
+                             if start_environment == "mountainscape.mp4":
+                                 col = BLACK
+                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                         
                         if (now > collision_timer + (delay*13)) & (now < collision_timer + (delay*15)):
                              crouch = "do a squat"
                              crouch_rect = font.render(f"{crouch}", True, WHITE)
-                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                         
                         if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*15)):
                              jump = "do a jumping jack"
                              jump_rect = font.render(f"{jump}", True, WHITE)
-                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                     if (now > collision_timer + (delay*15)):
                         obstacles.empty()
@@ -589,14 +592,20 @@ while True:
                 pygame.draw.polygon(screen, BLUE, vertices)
                 # notify player when to do exercise/when obstacle is coming up
                 if (y1-(obstacle.y + obstacle.height))<=20 and obstacle.y <y3:
+                    text_col = RED
+                    if start_environment == "mountainscape.mp4":
+                            #Maroon color, for improved contrast
+                            text_col = (80,0,0)
+                    elif start_environment == "oceanscape.mp4":
+                            text_col = (204, 255, 0)
                             if style == "crouch":
                                 notif = "jump now!"
                             elif style == "jump":
                                 notif = "squat now!"
                             else:
                                 notif = "move now!"
-                            notif_rect = font.render(f"{notif}", True, RED)
-                            ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                            notif_rect = font.render(f"{notif}", True, text_col)
+                            ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
                         
                 # colision handling
                 hit_obstacle = False
@@ -689,14 +698,19 @@ while True:
             if player.landmarks:
                 # notify player when to do exercise/when obstacle is coming up
                 if (y1-(obstacle.y + obstacle.height))<=20 and obstacle.y <y3:
+                    text_col = RED
+                    if start_environment == "mountainscape.mp4":
+                        text_col = (80,0,0)
+                    elif start_environment == "oceanscape.mp4":
+                            text_col = (204, 255, 0)
                     if obstacle.style == "jump":
                         notif = "squat now"
                     elif obstacle.style == "crouch":
                         notif = "jump now!"
                     else:
                         notif = "move now!"
-                    notif_rect = font.render(f"{notif}", True, RED)
-                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=RED, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    notif_rect = font.render(f"{notif}", True, text_col)
+                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
 
                 if obstacle.get_rect().y > y1 and obstacle.get_rect().y < y3:
                     for x, y in player.landmarks:
