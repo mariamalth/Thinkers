@@ -367,6 +367,8 @@ while True:
     # Initial part of tutorial: hands are not joined and tutorial did not start
     if tutorial_hands_joined == False:
         welcome = "welcome..."
+        if username != None:
+            welcome = f"welcome, {username}"
         welcome_rect = font2.render(f"{welcome}", True, WHITE)
         join = "join your hands to start"
         join_rect = font2.render(f"{join}", True, WHITE)
@@ -532,19 +534,21 @@ while True:
                              stand = "do a jump to the left, center, or right"
                              stand_rect = font.render(f"{stand}", True, WHITE)
                              col = GREEN 
+                             drop = (1.0,1.0)
                              if start_environment == "mountainscape.mp4":
                                  col = BLACK
-                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                                 drop = (0,0)
+                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=col, fontname=font_name, fontsize=22,shadow=drop)
                         
                         if (now > collision_timer + (delay*13)) & (now < collision_timer + (delay*15)):
                              crouch = "do a squat"
                              crouch_rect = font.render(f"{crouch}", True, WHITE)
-                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=22,shadow=drop)
                         
                         if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*15)):
                              jump = "do a jumping jack"
                              jump_rect = font.render(f"{jump}", True, WHITE)
-                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=22,shadow=drop)
 
                     if (now > collision_timer + (delay*15)):
                         obstacles.empty()
