@@ -76,6 +76,7 @@ skip_timer = 0
 motion_timer = 0
 collision_timer = 0
 
+show_obstacle_point = False
 obstacles_avoided = 0
 
 
@@ -332,7 +333,7 @@ while True:
         obstacles.update()
     
     # Draw character
-    if player.landmarks:
+    if player.landmarks and show_obstacle_point == False:
         xa, ya = player.landmarks[0]
         xb, yb = player.landmarks[8]
         r = math.sqrt((xb - xa)**2 + (yb - ya)**2)  
@@ -478,7 +479,7 @@ while True:
                     if (now > collision_timer + (delay*4)) & (now < collision_timer + (delay*8)):
                         tutorial = "the position of the line changes based on the obstacle coming \n towards you, you'll have to do different exercises to avoid them!"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH/8, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH/10, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                         
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -566,11 +567,13 @@ while True:
                              crouch_rect = font.render(f"{crouch}", True, WHITE)
                              ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=24,shadow=drop)
                         
-                        if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*15)):
+                        if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*14.9)):
                              jump = "do a jumping jack"
                              jump_rect = font.render(f"{jump}", True, WHITE)
                              ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=24,shadow=drop)
 
+                    if (now > collision_timer + (delay*14.9)):
+                        show_obstacle_point = True
                     if (now > collision_timer + (delay*15)) & (now < collision_timer + (delay*19)):
                         explain = "these are the different obstacles you will see \nand what action they mean"
                         explain_rect = font.render(f"{explain}", True,WHITE)
@@ -579,7 +582,8 @@ while True:
                         style = ["stand","jump","crouch"]
                         position = "center"
                         
-                        if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*19)):
+                        if (now > collision_timer + (delay*15.5)) & (now < collision_timer + (delay*19)):
+                            
                             img_style = style[0]
                             img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
                             img = Image.open(img_file)
@@ -603,8 +607,12 @@ while True:
                             text_rect = font.render(f"{obs_type[0]}", True,WHITE)
                             ptext.draw(text, (pos+(pic_width/4), HEIGHT / 1.5), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
                                             
-                        if (now > collision_timer + (delay*13)) & (now < collision_timer + (delay*19)):
-                            img_style = style[1]
+                        if (now > collision_timer + (delay*16)) & (now < collision_timer + (delay*19)):
+                            if start_environment == "oceanscape.mp4":
+                                img_style = "crouch"
+                            else:
+                                img_style = style[1]
+                            
                             img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
                             img = Image.open(img_file)
                             r = 15/img.size[1]
@@ -628,7 +636,7 @@ while True:
                             ptext.draw(text, (pos+(pic_width/4), HEIGHT / 1.5), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
                                             
                         
-                        if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*19)):
+                        if (now > collision_timer + (delay*17)) & (now < collision_timer + (delay*19)):
                             img_style = style[2]
                             img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
                             img = Image.open(img_file)
@@ -654,6 +662,7 @@ while True:
 
                     
                     if (now > collision_timer + (delay*19)):
+                        show_obstacle_point = False
                         obstacles.empty()
                         tutorial_point = "obstacles highlight"
                         
