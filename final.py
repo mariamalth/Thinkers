@@ -37,15 +37,15 @@ pygame.display.set_caption("Immersive Fitness Experience")
 
 # set up the colors
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+BLACK = (20,20,20)
 BLUE = (56, 239, 245)
 GREEN = (0, 255, 0)
 RED = (255,0,0)
 
 #set up the fonts 
-font = pygame.font.Font('Dream MMA.ttf',22)
-font2 = pygame.font.Font('Dream MMA.ttf',32)
-font_name = 'Dream MMA.ttf'
+font = pygame.font.Font('blade.ttf',24)
+font2 = pygame.font.Font('blade.ttf',32)
+font_name = 'blade.ttf'
 
 # setting up the leaderboard
 # to put each row below the other
@@ -72,6 +72,7 @@ tutorial_point = "not started"
 random_landmarks = [[0],[0]]
 moved_check = False
 
+skip_timer = 0
 motion_timer = 0
 collision_timer = 0
 
@@ -115,11 +116,12 @@ def addObstacle(style = None,position = None):
     if style == None:
         position = ["center","left","right"][obstacle_counter % 3]
         style = random.choice(["stand","jump","crouch"])
-    if style == "jump":
+    if start_environment == "oceanscape.mp4" and style == "jump":
         img_style = "crouch"
     else:
         img_style = style
     img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+
     img = Image.open(img_file)
     r = 15/img.size[1]
     initial_width = img.size[0] * r 
@@ -366,13 +368,14 @@ while True:
     
     # Initial part of tutorial: hands are not joined and tutorial did not start
     if tutorial_hands_joined == False:
-        welcome = "welcome..."
-        if username != None:
-            welcome = f"welcome, {username}"
+        ### TESTING 
+        welcome = f"welcome.."
+        if player.username != None:
+            welcome = f"welcome.. {player.username.lower()}"
         welcome_rect = font2.render(f"{welcome}", True, WHITE)
         join = "join your hands to start"
         join_rect = font2.render(f"{join}", True, WHITE)
-        ptext.draw(welcome, (WIDTH / 2 - welcome_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
+        ptext.draw(welcome, (WIDTH / 2 - welcome_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE,fontname=font_name, fontsize=32,shadow=(1.0,1.0))
         ptext.draw(join, (WIDTH / 2 - join_rect.get_rect().width / 2, HEIGHT / 2), color=WHITE, fontname=font_name, fontsize=32,shadow=(1.0,1.0))
 
         #accordance to data and privacy laws notice 
@@ -387,22 +390,40 @@ while True:
                 random_landmarks[0] = player.landmarks[12]
                 random_landmarks[1] = player.landmarks[2]
                 #change tutorial point to first point, the motion detection highlight
-                tutorial_point = "motion detection highlight"
+                tutorial_point = "skip tutorial"
                 # set-up the collision zone
                 nose_y, ankle_y = player.landmarks[0][1], player.landmarks[28][1]
 
-                #store the motion timer for the tutorial 
-                motion_timer = pygame.time.get_ticks()
+                #store the skip timer for the tutorial 
+                skip_timer = pygame.time.get_ticks()
 
     # All the different points and screens of the tutorial, past welcome screen
     elif tutorial_completed == False:
+            if tutorial_point == "skip tutorial":
+                now = pygame.time.get_ticks()
+                delay = 5000 #5 seconds
+                tutorial = "if you would like to skip the tutorial, join your hands again."
+                tutorial_rect = font.render(f"{tutorial}", True, WHITE)
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
+                
+                if ( now < skip_timer + delay ) and ( now > skip_timer + delay/2 ):
+                    if checkHandsJoined(landmarks):
+                        tutorial_completed = True            
+                        tutorial_point = "done"
+                elif ( now > skip_timer + delay ):
+                    tutorial_point = "motion detection highlight"
+
+                    #store the motion timer for the tutorial 
+                    motion_timer = pygame.time.get_ticks()
+                
+
             if tutorial_point=="motion detection highlight":
                 now = pygame.time.get_ticks()
                 delay = 5000 #5 seconds
                 #encourage user to move left and right and move arms around
                 tutorial = "this experience is based on motion detection, try moving around!"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                 
                 
                 #check that they moved around
@@ -423,7 +444,7 @@ while True:
             if tutorial_point == "collision line highlight":
                     style = "stand"
                     position = "center"
-                    if style == "jump":
+                    if style == "jump": #don't need to change since obstacle image wont actually show
                         img_style = "crouch"
                     else:
                         img_style = style
@@ -442,12 +463,12 @@ while True:
                     if ( now < collision_timer + delay ):
                         tutorial = "in this experience, different obstacles will come towards you"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 4), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                         
                     if (now > collision_timer + (delay)) & (now < collision_timer + (delay*4)):
                         tutorial = "if your character touches the obstacle \n while in the colored line, you get hit!"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH / 4.5, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH / 4, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -457,7 +478,7 @@ while True:
                     if (now > collision_timer + (delay*4)) & (now < collision_timer + (delay*8)):
                         tutorial = "the position of the line changes based on the obstacle coming \n towards you, you'll have to do different exercises to avoid them!"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (40, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH/8, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                         
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -466,7 +487,7 @@ while True:
                     if (now > collision_timer + (delay*8)) & (now < collision_timer + (delay*9)):
                         position = "this line is created based on your mid range"
                         position_rect = font.render(f"{position}", True, WHITE)
-                        ptext.draw(position, (WIDTH / 2 - position_rect.get_rect().width / 2,HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(position, (WIDTH / 2 - position_rect.get_rect().width / 2,HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                         
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -480,7 +501,7 @@ while True:
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
                             style = "jump"
                             position = "center"
-                            if style == "jump":
+                            if start_environment == "oceanscape.mp4" and style == "jump":
                                 img_style = "crouch"
                             else:
                                 img_style = style
@@ -493,7 +514,7 @@ while True:
                     if (now > collision_timer + (delay*9)) & (now < collision_timer + (delay*10)):
                         tutorial = "this line is created based on your head range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH/6, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -506,7 +527,7 @@ while True:
                             #update dummy obstacle to show collision zone of different locations e.g. head, mid, ankles
                             style = "crouch"
                             position = "center"
-                            if style == "jump":
+                            if start_environment == "oceanscape.mp4" and style == "jump":
                                 img_style = "crouch"
                             else:
                                 img_style = style
@@ -519,7 +540,7 @@ while True:
                     if (now > collision_timer + (delay*10)) & (now < collision_timer + (delay*11)):
                         tutorial = "and this line is created based on your ankle range"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH/6.5, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH/6.5, HEIGHT / 6), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                         x1,y1,x2,y2,x4,y4,x3,y3 = dummy_obstacle.get_colision_zone(nose_y,ankle_y)
                         vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
@@ -528,7 +549,7 @@ while True:
                     if (now > collision_timer + (delay*11)) & (now < collision_timer + (delay*15)):
                         tutorial = "so, you don't have to move backwards or forwards just:"
                         tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                        ptext.draw(tutorial, (WIDTH/8.5, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                        ptext.draw(tutorial, (WIDTH/8.5, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                         if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*15)):
                              stand = "do a jump to the left, center, or right"
@@ -538,132 +559,213 @@ while True:
                              if start_environment == "mountainscape.mp4":
                                  col = BLACK
                                  drop = (0,0)
-                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=col, fontname=font_name, fontsize=22,shadow=drop)
+                             ptext.draw(stand, (WIDTH/6, (HEIGHT / 6)+100), color=col, fontname=font_name, fontsize=24,shadow=drop)
                         
                         if (now > collision_timer + (delay*13)) & (now < collision_timer + (delay*15)):
                              crouch = "do a squat"
                              crouch_rect = font.render(f"{crouch}", True, WHITE)
-                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=22,shadow=drop)
+                             ptext.draw(crouch, (WIDTH/6, (HEIGHT / 6)+200), color=col, fontname=font_name, fontsize=24,shadow=drop)
                         
                         if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*15)):
                              jump = "do a jumping jack"
                              jump_rect = font.render(f"{jump}", True, WHITE)
-                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=22,shadow=drop)
+                             ptext.draw(jump, (WIDTH/6, (HEIGHT / 6)+300), color=col, fontname=font_name, fontsize=24,shadow=drop)
 
-                    if (now > collision_timer + (delay*15)):
+                    if (now > collision_timer + (delay*15)) & (now < collision_timer + (delay*19)):
+                        explain = "these are the different obstacles you will see \nand what action they mean"
+                        explain_rect = font.render(f"{explain}", True,WHITE)
+                        ptext.draw(explain, (WIDTH /2 - explain_rect.get_rect().width / 2.5, HEIGHT / 10), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
+                            
+                        style = ["stand","jump","crouch"]
+                        position = "center"
+                        
+                        if (now > collision_timer + (delay*12)) & (now < collision_timer + (delay*19)):
+                            img_style = style[0]
+                            img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                            img = Image.open(img_file)
+                            r = 15/img.size[1]
+                            initial_width = img.size[0] * r 
+                            initial_height = img.size[1] * r
+
+                            # resize image
+                            pos = 50
+                            pic_width = 200
+                            pic_height = 175
+
+                            img_resized = img.resize((pic_width, pic_height))
+                            # Convert the resized image to a Pygame surface and blit it
+                            cube = pygame.image.frombuffer(img_resized.tobytes(), img_resized.size, "RGBA")
+                            screen.blit(cube, (pos, HEIGHT /2.5 ))
+                            
+                            #print the corresponding text below it
+                            obs_type = ["move"]
+                            text = f"{obs_type[0]}"
+                            text_rect = font.render(f"{obs_type[0]}", True,WHITE)
+                            ptext.draw(text, (pos+(pic_width/4), HEIGHT / 1.5), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
+                                            
+                        if (now > collision_timer + (delay*13)) & (now < collision_timer + (delay*19)):
+                            img_style = style[1]
+                            img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                            img = Image.open(img_file)
+                            r = 15/img.size[1]
+                            initial_width = img.size[0] * r 
+                            initial_height = img.size[1] * r
+
+                            # resize image
+                            pic_width = 300
+                            pic_height = 150
+                            pos = (WIDTH / 2) - (pic_width/2)
+
+                            img_resized = img.resize((pic_width, pic_height))
+                            # Convert the resized image to a Pygame surface and blit it
+                            cube = pygame.image.frombuffer(img_resized.tobytes(), img_resized.size, "RGBA")
+                            screen.blit(cube, (pos, HEIGHT /2.5 ))
+                            
+                            #print the corresponding text below it
+                            obs_type = ["squat"]
+                            text = f"{obs_type[0]}"
+                            text_rect = font.render(f"{obs_type[0]}", True,WHITE)
+                            ptext.draw(text, (pos+(pic_width/4), HEIGHT / 1.5), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
+                                            
+                        
+                        if (now > collision_timer + (delay*14)) & (now < collision_timer + (delay*19)):
+                            img_style = style[2]
+                            img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                            img = Image.open(img_file)
+                            r = 15/img.size[1]
+                            initial_width = img.size[0] * r 
+                            initial_height = img.size[1] * r
+
+                            # resize image
+                            pic_width = 300
+                            pic_height = 150
+                            pos = WIDTH - 350
+
+                            img_resized = img.resize((pic_width, pic_height))
+                            # Convert the resized image to a Pygame surface and blit it
+                            cube = pygame.image.frombuffer(img_resized.tobytes(), img_resized.size, "RGBA")
+                            screen.blit(cube, (pos, HEIGHT /2.5 ))
+                            
+                            #print the corresponding text below it
+                            obs_type = ["jump"]
+                            text = f"{obs_type[0]}"
+                            text_rect = font.render(f"{obs_type[0]}", True,WHITE)
+                            ptext.draw(text, (pos+(pic_width/4), HEIGHT / 1.5), color=WHITE, fontname=font_name, fontsize=30,shadow=(1.5,2.0))
+
+                    
+                    if (now > collision_timer + (delay*19)):
                         obstacles.empty()
                         tutorial_point = "obstacles highlight"
                         
             if tutorial_point == "obstacles highlight":
                  #show users standing obstacles and concept of game
-                tutorial = "you will have to avoid different incoming obstacles, get ready!"
+                tutorial = "now, try to avoid the different incoming obstacles.. get ready!"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                 style = "stand"
                 
             if tutorial_point == "crouch obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, squat below the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                 style = "jump"
                 
             if tutorial_point == "jump obstacle highlight": 
                 tutorial = "to avoid this type of obstacle, do a jumping jack high above the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
-                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
                 style = "crouch"
                 
-            if tutorial_point!= "motion detection highlight" and tutorial_point != "collision line highlight":
-                if len(obstacles) == 0:
-                    position = ["center","left","right"][obstacle_counter % 3]
-                    if style == "jump":
-                        img_style = "crouch"
-                    else:
-                        img_style = style
-                    img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
-                    img = Image.open(img_file)
-                    r = 15/img.size[1]
-                    initial_width = img.size[0] * r 
-                    initial_height = img.size[1] * r
-                    new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
-                    obstacles.add(new_obstacle)
-                    obstacle_counter += 1
-                    for obstacle in obstacles:
-                        pass
-                    x1,y1,x2,y2,x4,y4,x3,y3 = obstacle.get_colision_zone(nose_y,ankle_y)
-                    vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
-                # drawing the collision zone
-                pygame.draw.polygon(screen, BLUE, vertices)
-                # notify player when to do exercise/when obstacle is coming up
-                if (y1-(obstacle.y + obstacle.height))<=20 and obstacle.y <y3:
-                    text_col = RED
-                    if start_environment == "mountainscape.mp4":
-                            #Maroon color, for improved contrast
-                            text_col = (80,0,0)
-                    elif start_environment == "oceanscape.mp4":
-                            text_col = (204, 255, 0)
-                            if style == "crouch":
-                                notif = "jump now!"
-                            elif style == "jump":
-                                notif = "squat now!"
-                            else:
-                                notif = "move now!"
-                            notif_rect = font.render(f"{notif}", True, text_col)
-                            ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
-                        
-                # colision handling
-                hit_obstacle = False
-                if player.landmarks:
-                    for obstacle in obstacles:
-                        pass
-                    # print(f"{obstacle.style} , {obstacle.y},{y1},{y3}")
-                    if obstacle.get_rect().y > y1 and obstacle.get_rect().y < y3:
-                        # print("y1 good")
-                        for x, y in player.landmarks:
-                            temp_rect = pygame.Rect(x, y, 10, 10)
-                            # pygame.draw.rect(screen,GREEN,temp_rect)
-                            if temp_rect.colliderect(obstacle.get_rect()):
-                                    # print("COLLIDED")
-                                    hit_obstacle = True
-                                    obstacles.empty()
-                                    break
-                        if hit_obstacle == False:
-                                obstacles_avoided+=1
+            if tutorial_point != "skip tutorial" and tutorial_point!="done":
+                if tutorial_point!= "motion detection highlight" and tutorial_point != "collision line highlight":
+                    if len(obstacles) == 0:
+                        position = ["center","left","right"][obstacle_counter % 3]
+                        if start_environment == "oceanscape.mp4" and style == "jump":
+                            img_style = "crouch"
                         else:
-                            #reset variable for next obstacle
-                            hit_obstacle = False  
-                        print(str(hit_obstacle) + " " + style)
-            #TO DO:play around with number
-            if obstacles_avoided == 2:
-                obstacles_avoided = 0 
-                obstacles.empty()
-                if style == "stand":
-                    tutorial_point = "crouch obstacle highlight" 
-                elif style == "jump":
-                    tutorial_point = "jump obstacle highlight"
-                else:
-                    tutorial_completed = True            
-                    tutorial_point = "done" 
-                 
-            # remove obstacles that have gone off the bottom of the screen and add new obstacles
-            for obstacle in obstacles:
-                if obstacle.y > HEIGHT:
-                    obstacles.remove(obstacle)
-                    position = ["center","left","right"][obstacle_counter % 3]
-                    if style == "jump":
-                        img_style = "crouch"
+                            img_style = style
+                        img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                        img = Image.open(img_file)
+                        r = 15/img.size[1]
+                        initial_width = img.size[0] * r 
+                        initial_height = img.size[1] * r
+                        new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
+                        obstacles.add(new_obstacle)
+                        obstacle_counter += 1
+                        for obstacle in obstacles:
+                            pass
+                        x1,y1,x2,y2,x4,y4,x3,y3 = obstacle.get_colision_zone(nose_y,ankle_y)
+                        vertices = [(x1, y1), (x2, y2), (x4, y4), (x3, y3)]
+                    # drawing the collision zone
+                    pygame.draw.polygon(screen, BLUE, vertices)
+                    # notify player when to do exercise/when obstacle is coming up
+                    if (y1-(obstacle.y + obstacle.height))<=20 and obstacle.y <y3:
+                        text_col = RED
+                        if start_environment == "mountainscape.mp4":
+                                #Maroon color, for improved contrast
+                                text_col = (80,0,0)
+                        elif start_environment == "oceanscape.mp4":
+                                text_col = (204, 255, 0)
+                        if style == "crouch":
+                            notif = "jump now!"
+                        elif style == "jump":
+                            notif = "squat now!"
+                        else:
+                            notif = "move now!"
+                        notif_rect = font.render(f"{notif}", True, text_col)
+                        ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
+                            
+                    # colision handling
+                    hit_obstacle = False
+                    if player.landmarks:
+                        for obstacle in obstacles:
+                            pass
+                        # print(f"{obstacle.style} , {obstacle.y},{y1},{y3}")
+                        if obstacle.get_rect().y > y1 and obstacle.get_rect().y < y3:
+                            # print("y1 good")
+                            for x, y in player.landmarks:
+                                temp_rect = pygame.Rect(x, y, 10, 10)
+                                # pygame.draw.rect(screen,GREEN,temp_rect)
+                                if temp_rect.colliderect(obstacle.get_rect()):
+                                        # print("COLLIDED")
+                                        hit_obstacle = True
+                                        obstacles.empty()
+                                        break
+                            if hit_obstacle == False:
+                                    obstacles_avoided+=1
+                            else:
+                                #reset variable for next obstacle
+                                hit_obstacle = False  
+                            print(str(hit_obstacle) + " " + style)
+                #TO DO:play around with number
+                if obstacles_avoided == 2:
+                    obstacles_avoided = 0 
+                    obstacles.empty()
+                    if style == "stand":
+                        tutorial_point = "crouch obstacle highlight" 
+                    elif style == "jump":
+                        tutorial_point = "jump obstacle highlight"
                     else:
-                        img_style = style
-                    img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
-                    img = Image.open(img_file)
-                    r = 15/img.size[1]
-                    initial_width = img.size[0] * r 
-                    initial_height = img.size[1] * r
-                    new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
-                    obstacles.add(new_obstacle)
-                    obstacle_counter += 1
-            
-        
+                        tutorial_completed = True            
+                        tutorial_point = "done" 
+                    
+                # remove obstacles that have gone off the bottom of the screen and add new obstacles
+                for obstacle in obstacles:
+                    if obstacle.y > HEIGHT:
+                        obstacles.remove(obstacle)
+                        position = ["center","left","right"][obstacle_counter % 3]
+                        if start_environment == "oceanscape.mp4" and style == "jump":
+                            img_style = "crouch"
+                        else:
+                            img_style = style
+                        img_file = f"{start_environment.replace('.mp4','')}_{img_style}.jpg"
+                        img = Image.open(img_file)
+                        r = 15/img.size[1]
+                        initial_width = img.size[0] * r 
+                        initial_height = img.size[1] * r
+                        new_obstacle = Obstacle(position,style,initial_width,initial_height,img)
+                        obstacles.add(new_obstacle)
+                        obstacle_counter += 1
             
             # drawing the obstacles
             for obstacle in obstacles:
@@ -679,15 +781,19 @@ while True:
      #(game not started)join hands for the game to start after tutorial is completed
     if tutorial_completed == True:
         if game_started == False:
-            game_join = "join your hands to start"
-            game_rect = font.render(f"{game_join}", True, GREEN)
-            ptext.draw(game_join, (WIDTH / 2 - game_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+            now = pygame.time.get_ticks()
+            delay = 5000 #5 seconds
+            if ( now > skip_timer + delay ):
+            
+                game_join = "join your hands to start"
+                game_rect = font.render(f"{game_join}", True, GREEN)
+                ptext.draw(game_join, (WIDTH / 2 - game_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
 
-            if results.pose_landmarks:
-                if checkHandsJoined(landmarks):
-                    game_started = True
-               
+                if results.pose_landmarks:
+                    if checkHandsJoined(landmarks):
+                        game_started = True
+                
     if game_started:
         if player.lives !=0:
             screen.blit(font.render(f"score: {int(score)}", True, WHITE), (10, 10))
@@ -714,7 +820,7 @@ while True:
                     else:
                         notif = "move now!"
                     notif_rect = font.render(f"{notif}", True, text_col)
-                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(notif, (WIDTH / 2 - notif_rect.get_rect().width / 2, HEIGHT / 4), color=text_col, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                 if obstacle.get_rect().y > y1 and obstacle.get_rect().y < y3:
                     for x, y in player.landmarks:
@@ -782,7 +888,7 @@ while True:
         if countdown > 0:
             game_over = f"game over.. join hands in {countdown_seconds} seconds to restart"
             game_over_rect = font.render(f"{game_over}", True, GREEN)
-            ptext.draw(game_over, (WIDTH / 2 - game_over_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+            ptext.draw(game_over, (WIDTH / 2 - game_over_rect.get_rect().width / 2, HEIGHT / 4), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
             
             #order dataset based on highest scores
@@ -802,13 +908,13 @@ while True:
                 if row == username:
                     user_row = f"{row.lower()}.................{str(score)}"
                     user_row_rect = font.render(f"{user_row}", True, GREEN)
-                    ptext.draw(user_row, (WIDTH / 2 - user_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=GREEN, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(user_row, (WIDTH / 2 - user_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=GREEN, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
 
                 else:
                     leader_row = f"{row.lower()}.................{str(score)}"
                     leader_row_rect = font.render(f"{leader_row}", True, WHITE)
-                    ptext.draw(leader_row, (WIDTH / 2 - leader_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=WHITE, fontname=font_name, fontsize=22,shadow=(1.0,1.0))
+                    ptext.draw(leader_row, (WIDTH / 2 - leader_row_rect.get_rect().width / 2, (HEIGHT / 3)+offset), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
 
                 offset+=30       
 
@@ -862,6 +968,9 @@ while True:
             cv2.destroyAllWindows()
             pygame.quit()
             exit(0)
+        if tutorial_point == "skip tutorial":
+            if event.type == pygame.USEREVENT:
+                skip_timer-=1
         if tutorial_point == "motion detection highlight":
             if event.type == pygame.USEREVENT:
                 motion_timer-=1
