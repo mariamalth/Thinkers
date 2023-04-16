@@ -87,20 +87,21 @@ mp_pose = mp.solutions.pose
 cap = cv2.VideoCapture(0)
 
 def checkHandsJoined(landmarks): 
-    # Get the left wrist landmark x and y coordinates.
-    left_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x * WIDTH,
-                          landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y * HEIGHT)
+    if landmarks:
+        # Get the left wrist landmark x and y coordinates.
+        left_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x * WIDTH,
+                            landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y * HEIGHT)
 
-    # Get the right wrist landmark x and y coordinates.
-    right_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].x * WIDTH,
-                           landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].y * HEIGHT)
-    
-    # Calculate the euclidean distance between the left and right wrist.
-    euclidean_distance = int(math.hypot(left_wrist_landmark[0] - right_wrist_landmark[0],
-                                   left_wrist_landmark[1] - right_wrist_landmark[1]))
-    # Compare the distance between the wrists with a appropriate threshold to check if both hands are joined.
-    if euclidean_distance < HEIGHT * 0.07:  
-        return True
+        # Get the right wrist landmark x and y coordinates.
+        right_wrist_landmark = (landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].x * WIDTH,
+                            landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].y * HEIGHT)
+        
+        # Calculate the euclidean distance between the left and right wrist.
+        euclidean_distance = int(math.hypot(left_wrist_landmark[0] - right_wrist_landmark[0],
+                                    left_wrist_landmark[1] - right_wrist_landmark[1]))
+        # Compare the distance between the wrists with a appropriate threshold to check if both hands are joined.
+        if euclidean_distance < HEIGHT * 0.07:  
+            return True
     return False
 
 def interpolate_points(point1,point2, n):
@@ -308,7 +309,6 @@ lvl = 1
 # Main loop
 while True:
     frame_counter+=1
-    print(f"tutorial_hands_joined: {tutorial_hands_joined} \n tutorial_point: {tutorial_point} \n tutorial_completed: {tutorial_completed} \n game started: {game_started} \n player lives: {player.lives} \n player username: {player.username}")
     # Read frame from camera
     ret, frame = cap.read()
     frame = cv2.flip(frame, 1)
@@ -674,6 +674,9 @@ while True:
                 style = "stand"
                 
             if tutorial_point == "crouch obstacle highlight": 
+                #PRESENTATION DEMO ONLY 
+                tutorial_completed = True 
+                tutorial_point = "done"  
                 tutorial = "to avoid this type of obstacle, squat below the line"
                 tutorial_rect = font.render(f"{tutorial}", True, WHITE)
                 ptext.draw(tutorial, (WIDTH / 2 - tutorial_rect.get_rect().width / 2, HEIGHT / 6), color=WHITE, fontname=font_name, fontsize=24,shadow=(1.0,1.0))
@@ -729,14 +732,11 @@ while True:
                     if player.landmarks:
                         for obstacle in obstacles:
                             pass
-                        # print(f"{obstacle.style} , {obstacle.y},{y1},{y3}")
                         if obstacle.get_rect().y > y1 and obstacle.get_rect().y < y3:
-                            # print("y1 good")
                             for x, y in player.landmarks:
                                 temp_rect = pygame.Rect(x, y, 10, 10)
                                 # pygame.draw.rect(screen,GREEN,temp_rect)
                                 if temp_rect.colliderect(obstacle.get_rect()):
-                                        # print("COLLIDED")
                                         hit_obstacle = True
                                         obstacles.empty()
                                         break
@@ -745,8 +745,6 @@ while True:
                             else:
                                 #reset variable for next obstacle
                                 hit_obstacle = False  
-                            print(str(hit_obstacle) + " " + style)
-                #TO DO:play around with number
                 if obstacles_avoided == 2:
                     obstacles_avoided = 0 
                     obstacles.empty()
@@ -837,13 +835,11 @@ while True:
                         if temp_rect.colliderect(obstacle.get_rect()):
                                 # the player has collided with an obstacle, so lose a life
                                 if player.lives !=0:
-                                    # print("hit player, warn next time")
                                     player.lives -= 1
                                 if player.lives == 0:
                                     # player has no lives left
                                     # Create randomly generated username for player
                                     # generating random strings
-                                    # if username == None:
                                         username = player.username
                                         user_score = [username,int(score)]
                                         #!! in the end, this needs to be modified for the leaderboard to store the top 10
@@ -904,7 +900,6 @@ while True:
             data = data.sort_values(by=['Score'], ascending=False)
             # get the top 10 scores 
             data = data.head(10)
-            print(data)
             #save the leaderboard to the updated csv so there will always be only 10 rows stored
             csv_save = data
             csv_save.to_csv("leaderboard.csv", index=False) 
