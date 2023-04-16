@@ -1,6 +1,6 @@
 # Thinkers
 
-# Motion-Detection Based Immserive Fitness Experience for CMU-Q IS Junior Consulting Project X STA 
+# Motion-Detection Based Immersive Fitness Experience for CMU-Q IS Junior Consulting Project X STA 
 The code's purpose and functionality is to launch an endless runner game, in which the user can manipulate the character's actions through physical gestures.
 
 # Softwares
